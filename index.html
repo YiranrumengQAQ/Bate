@@ -2,59 +2,448 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>浪漫背景页面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>依然如梦 | 梦境花园</title>
     <style>
+        /* --- 1. 基础字体与变量 --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&display=swap');
+
+        :root {
+            --primary-pink: #ff9a9e;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-color: #5a5a5a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            /* 设置背景图片 */
-            background-image: url('https://thumbs2.imgbox.com/38/03/LPeTk5vR_t.jpg');
-            
-            /* 背景图片不重复 */
-            background-repeat: no-repeat;
-            
-            /* 背景图片覆盖整个容器 */
-            background-size: cover; 
-            
-            /* 背景图片固定，不随滚动条滚动 */
-            background-attachment: fixed;
-            
-            /* 背景图片居中 */
-            background-position: center center;
-            
-            /* 确保页面高度足够展示背景 */
+            font-family: 'Noto Serif SC', serif;
+            color: var(--text-color);
+            /* 梦幻渐变背景 */
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            background-attachment: fixed; /* 视差滚动 */
             min-height: 100vh;
-            margin: 0; /* 移除默认边距 */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* 柔和字体 */
-            color: #fff; /* 文本颜色 */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 文本阴影增强可读性 */
-            display: flex; /* 弹性布局居中文本 */
-            justify-content: center; /* 水平居中 */
-            align-items: center; /* 垂直居中 */
-            flex-direction: column; /* 垂直排列内容 */
+            overflow-x: hidden; /* 禁止横向滚动 */
+            -webkit-tap-highlight-color: transparent; /* 移除手机点击高亮 */
+        }
+
+        /* --- 2. 手柄相关样式 (你提供的代码) --- */
+        #gamepad-cursor {
+            position: fixed; 
+            width: 24px; /* 稍微调大一点点方便看 */
+            height: 24px;
+            background-color: rgba(255, 192, 203, 0.7); /* 改为粉色半透明，更搭主题 */
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.8); /* 添加发光效果 */
+            pointer-events: none; 
+            z-index: 9999;
+            visibility: hidden; 
+            opacity: 0; 
+            transition: opacity 0.3s ease, transform 0.05s linear; 
+        }
+        #gamepad-cursor.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #gamepad-status {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.9); /* 改为白色背景更清新 */
+            color: #666;
+            border-radius: 20px;
+            font-size: 0.85em;
+            z-index: 10000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            visibility: hidden; 
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
+            backdrop-filter: blur(5px);
+        }
+        #gamepad-status.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- 3. 背景装饰球 --- */
+        .blob {
+            position: fixed; /* 改为 fixed 避免随页面滚动导致布局问题 */
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: -1;
+            opacity: 0.8;
+            animation: float 10s infinite ease-in-out;
+        }
+        .blob:nth-child(1) { width: 300px; height: 300px; background: #ffc3a0; top: -10%; left: -10%; }
+        .blob:nth-child(2) { width: 350px; height: 350px; background: #a18cd1; bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        /* --- 4. 导航栏 --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 1.4rem;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            margin-left: 15px;
+            font-size: 0.95rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+
+        /* --- 5. 头部区域 --- */
+        header {
             text-align: center;
+            padding: 50px 20px 30px;
         }
 
-        .romantic-text {
-            font-size: 3em; /* 大字体 */
-            font-weight: bold;
-            letter-spacing: 2px; /* 字符间距 */
+        .avatar-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 20px;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+            animation: breathing 4s ease-in-out infinite;
+        }
+
+        .avatar-ring {
+            position: absolute;
+            top: -6px; left: -6px; right: -6px; bottom: -6px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #5BCEFA, #F5A9B8, #FFFFFF, #F5A9B8, #5BCEFA);
+            z-index: -1;
+            opacity: 0.7;
+            animation: spin 10s linear infinite;
+        }
+
+        h1 {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.95);
             margin-bottom: 20px;
+            min-height: 1.5em;
         }
 
-        .romantic-slogan {
-            font-size: 1.5em;
-            font-style: italic; /* 斜体 */
-            max-width: 800px;
-            line-height: 1.6;
+        /* --- 6. 内容容器 (适配 Mobile/PC) --- */
+        .container {
+            width: 100%;
+            max-width: 800px; /* 限制最大宽度，PC端居中 */
+            margin: 0 auto;
+            padding: 0 15px 40px; /* 底部留白 */
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .section-title {
+            font-family: 'ZCOOL XiaoWei', serif;
+            color: #7b68ee;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            border-bottom: 2px dashed #ffb7b2;
+            display: inline-block;
+        }
+
+        .highlight-text {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: #5BCEFA;
+            font-weight: bold;
+        }
+
+        /* 文章列表 */
+        .post-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .post-card:hover {
+            background: #fff;
+            transform: translateX(5px); /* 悬停时轻微右移 */
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+            font-size: 0.8rem;
+            padding-bottom: 50px; /* 给手机底部留出空间 */
+        }
+
+        /* 动画 */
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(15px, 15px); }
+        }
+
+        /* --- 7. 媒体查询 (PE适配重点) --- */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .container { padding: 0 10px 40px; }
+            .glass-card { padding: 20px; margin-bottom: 20px; }
+            .avatar-container { width: 120px; height: 120px; }
+            nav { padding: 15px; }
+            /* 手机上手指容易遮挡，可以适当调整手柄提示位置 */
+            #gamepad-status { top: auto; bottom: 10px; left: 10px; } 
         }
     </style>
 </head>
 <body>
-    <div class="romantic-text">
-        与你共度，浪漫永恒
+
+    <div id="gamepad-status">手柄状态: 未连接</div>
+    <div id="gamepad-cursor"></div>
+    
+    <div class="blob"></div>
+    <div class="blob"></div>
+
+    <nav>
+        <div class="logo">Dreamy.</div>
+        <div class="nav-links">
+            <a href="#">首页</a>
+            <a href="#">关于</a>
+        </div>
+    </nav>
+
+    <header>
+        <div class="avatar-container">
+            <div class="avatar-ring"></div>
+            <img src="https://thumbs2.imgbox.com/4a/f7/uRN5WK7f_t.jpg" alt="头像" class="avatar">
+        </div>
+        <h1>依然如梦</h1>
+        <p class="tagline" id="typing-text">...</p>
+    </header>
+
+    <div class="container">
+        <section class="glass-card">
+            <h2 class="section-title">✨ 关于我</h2>
+            <div class="about-text">
+                <p>你好呀，我是<strong>依然如梦</strong>。</p>
+                <p>我是一个努力追逐光芒的 <span class="highlight-text">跨性别女孩</span> 🏳️‍⚧️。正在一点点重塑真实的自己。</p>
+                <p>如果你连接了手柄 🎮，试着推动摇杆，光标会带你浏览我的梦境。</p>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2 class="section-title">📖 碎碎念</h2>
+            
+            <article class="post-card" onclick="alert('打开日记：今天也是可爱的一天')">
+                <div style="color:#999;font-size:0.8em">2023.10.24</div>
+                <h3>今天也是可爱的一天</h3>
+                <p style="font-size:0.9em;color:#666">买了新裙子，在镜子前转圈的时候，感觉自己真的在发光呢...</p>
+            </article>
+
+            <article class="post-card">
+                <div style="color:#999;font-size:0.8em">2023.10.20</div>
+                <h3>关于勇气的定义</h3>
+                <p style="font-size:0.9em;color:#666">即使前路未知，每一步都是在向着理想的自己靠近。</p>
+            </article>
+
+            <article class="post-card">
+                <div style="color:#999;font-size:0.8em">2023.10.15</div>
+                <h3>秋日的午后咖啡</h3>
+                <p style="font-size:0.9em;color:#666">阳光透过窗户洒下来，暖洋洋的。</p>
+            </article>
+            
+            <article class="post-card">
+                <div style="color:#999;font-size:0.8em">2023.10.10</div>
+                <h3>从男生模式切换</h3>
+                <p style="font-size:0.9em;color:#666">今天尝试了新的妆容，虽然还有点笨拙，但是很开心。</p>
+            </article>
+
+            <article class="post-card">
+                <div style="color:#999;font-size:0.8em">2023.10.05</div>
+                <h3>梦里的蝴蝶</h3>
+                <p style="font-size:0.9em;color:#666">昨晚做了一个梦，梦见自己终于长出了翅膀。</p>
+            </article>
+        </section>
+
+        <button id="start-button" style="display:none" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">回到顶部</button>
     </div>
-    <div class="romantic-slogan">
-        每一个瞬间都值得珍藏，如诗如画，只因有你。
-    </div>
+
+    <footer>
+        <p>© 2023 依然如梦 | Gamepad Supported 🎮</p>
+    </footer>
+
+    <script>
+        // --- 1. 打字机效果 ---
+        const text = "愿所有的温柔，都能在梦里相遇。";
+        const typingElement = document.getElementById('typing-text');
+        let textIndex = 0;
+        function typeWriter() {
+            if (textIndex < text.length) {
+                typingElement.innerHTML = text.substring(0, textIndex + 1);
+                textIndex++;
+                setTimeout(typeWriter, 150);
+            }
+        }
+        window.onload = typeWriter;
+
+        // --- 2. 手柄控制逻辑 (集成你的代码) ---
+        const gamepadStatus = document.getElementById('gamepad-status');
+        const gamepadCursor = document.getElementById('gamepad-cursor');
+        let gamepadIndex = null;
+        let gamepadInterval = null; 
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
+        const CURSOR_SPEED = 12; // 稍微调快一点
+        const SCROLL_SPEED = 20; // 滚动速度
+        const GAMEPAD_DEADZONE = 0.15; 
+        let aButtonWasPressed = false; 
+
+        // 手柄连接
+        window.addEventListener("gamepadconnected", (event) => {
+            gamepadIndex = event.gamepad.index;
+            console.log("Gamepad connected: %s", event.gamepad.id);
+            gamepadStatus.textContent = `🎮 已连接: ${event.gamepad.id.substring(0, 15)}...`; // 简化名字显示
+            gamepadStatus.classList.add('show');
+            gamepadCursor.classList.add('show');
+
+            if (!gamepadInterval) {
+                gamepadInterval = setInterval(gameLoop, 1000/60); 
+            }
+        });
+
+        // 手柄断开
+        window.addEventListener("gamepaddisconnected", (event) => {
+            if (event.gamepad.index === gamepadIndex) {
+                clearInterval(gamepadInterval);
+                gamepadInterval = null;
+                gamepadIndex = null;
+                gamepadStatus.textContent = "手柄状态: 未连接";
+                gamepadStatus.classList.remove('show');
+                gamepadCursor.classList.remove('show');
+            }
+        });
+
+        // 窗口大小改变时重置光标位置逻辑（可选，防止溢出）
+        window.addEventListener('resize', () => {
+            cursorX = Math.min(cursorX, window.innerWidth);
+            cursorY = Math.min(cursorY, window.innerHeight);
+        });
+
+        // 核心循环
+        function gameLoop() {
+            if (gamepadIndex === null) return;
+
+            const gamepads = navigator.getGamepads();
+            const gamepad = gamepads[gamepadIndex];
+            if (!gamepad) return;
+
+            // --- 左摇杆: 移动光标 ---
+            const leftStickX = Math.abs(gamepad.axes[0]) > GAMEPAD_DEADZONE ? gamepad.axes[0] : 0;
+            const leftStickY = Math.abs(gamepad.axes[1]) > GAMEPAD_DEADZONE ? gamepad.axes[1] : 0;
+            
+            cursorX += leftStickX * CURSOR_SPEED;
+            cursorY += leftStickY * CURSOR_SPEED;
+
+            // 限制光标在屏幕内
+            cursorX = Math.max(0, Math.min(window.innerWidth, cursorX));
+            cursorY = Math.max(0, Math.min(window.innerHeight, cursorY));
+
+            // -12px 是为了居中 (因为光标宽24px)
+            gamepadCursor.style.transform = `translate(${cursorX - 12}px, ${cursorY - 12}px)`; 
+
+            // --- 右摇杆: 滚动页面 ---
+            // 许多手柄右摇杆垂直轴是 axes[3]，有些是 axes[5]，这里主要兼容 axes[3]
+            const rightStickY = Math.abs(gamepad.axes[3]) > GAMEPAD_DEADZONE ? gamepad.axes[3] : 0;
+            if (rightStickY !== 0) {
+                window.scrollBy(0, rightStickY * SCROLL_SPEED);
+            }
+
+            // --- A键: 模拟点击 ---
+            const aButton = gamepad.buttons[0]; 
+            const isAPressed = aButton && aButton.pressed;
+
+            if (isAPressed && !aButtonWasPressed) {
+                // 视觉反馈：点击时光标缩小一下
+                gamepadCursor.style.transform = `translate(${cursorX - 12}px, ${cursorY - 12}px) scale(0.8)`;
+                
+                const event = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: cursorX,
+                    clientY: cursorY
+                });
+                const targetElement = document.elementFromPoint(cursorX, cursorY);
+                if (targetElement) {
+                    // 如果点击的是链接或可点击元素，触发它
+                    targetElement.dispatchEvent(event);
+                    // 如果是文章卡片内的元素，也可以触发点击效果
+                    targetElement.click(); 
+                }
+                
+                // 恢复光标大小
+                setTimeout(() => {
+                     gamepadCursor.style.transform = `translate(${cursorX - 12}px, ${cursorY - 12}px) scale(1)`;
+                }, 100);
+            }
+            aButtonWasPressed = isAPressed;
+            
+            // --- Start键: 例子 (回到顶部) ---
+            const startButton = gamepad.buttons[9]; 
+            if (startButton && startButton.pressed) {
+                 const startBtnElement = document.getElementById('start-button');
+                 if (startBtnElement) {
+                     startBtnElement.click();
+                 }
+            }
+        }
+    </script>
 </body>
 </html>
