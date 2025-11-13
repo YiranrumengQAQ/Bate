@@ -1,112 +1,254 @@
-<!doctype html>
-<html lang="en" dir="ltr" class="no-js">
+<!DOCTYPE html>
+<html class="">
   <head>
-    <meta charset="utf-8" />
-    <title>Starlight Echoes - A Love Story</title>
-
-    <meta property="og:title" content="Starlight Echoes - A Love Story"/>
-    <meta property="og:description" name="description" content="..."/>
-    <link rel="canonical" href="https://starlightechoes.com"/>
-    </head>
-  <body data-sveltekit-preload-data="hover">
-    <div class="wrapper svelte-7plrp5" data-cy="mood-bar" role="banner">
-        </div>
-
-    <div class="navigation svelte-rfuq4y">
-      <nav aria-label="Primary" class="svelte-rfuq4y">
-        <div class="logo-burger svelte-rfuq4y">
-          <a href="./en" data-cy="logo-link" class="svelte-rfuq4y">
-            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#FF5C77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 1.02-4 2.15-1-.93-2.24-2.15-4-2.15A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"></path>
-              <title id="romanticHead">Starlight Echoes Logo - Heart</title>
-            </svg>
-          </a>
-          <div class="hamburger-menu svelte-p9dp8">
-            <button aria-label="Menu toggle" popovertarget="expanding-menu" class="svelte-p9dp8"></button>
-            <div popover="" id="expanding-menu" class="svelte-p9dp8"></div>
+    <meta charset="utf-8">
+    <title>Starlight Union - Our Journey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Starlight Union – A Love Story Shared">
+    <meta property="og:image" content="https://starlightunion.com/img/heart_logo_2x.png">
+    <meta property="og:site_name" content="Starlight Union">
+    <meta property="og:description" content="Timeless. Boundless. Forever.">
+    
+    <link rel="icon" type="image/svg+xml" href="/img/heart_icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon-heart.png">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/starlight.css" rel="stylesheet" media="screen">
+  </head>
+  <body class="preload">
+    <div id="fb-root"></div>
+    <div class="tl_page_wrap">
+      <div class="tl_page_head navbar navbar-static-top navbar navbar-tg">
+        <div class="navbar-inner">
+          <div class="container clearfix">
+            <ul class="nav navbar-nav navbar-right"><li class="dropdown top_lang_select"><a class="dropdown-toggle" onclick="return dropdownClick(this, event)" href="#"><i class="dev_top_lang_icon"></i>MOOD <b class="minicaret"></b></a>
+<ul class="dropdown-menu"><li class="chosen "><a href="?settheme=light">Daydream (Light)</a></li><li class="long "><a href="?settheme=dark">Starlight (Dark)</a></li></ul></li><li class="navbar-twitter hidden-xs"><a href="https://instagram.com/ourstory" target="_blank" data-track="Follow/Instagram" onclick="trackDlClick(this, event)"><i class="icon icon-instagram"></i> Instagram</a></li></ul>
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="/">Home</a></li>
+              <li class=""><a href="/journey">Our Journey</a></li>
+              <li class=""><a href="/details">Details</a></li>
+              <li class="hidden-xs "><a href="/gallery">Gallery</a></li>
+              <li class="hidden-xs "><a href="/rsvp">RSVP</a></li>
+            </ul>
           </div>
         </div>
-        <ul class="svelte-ba5qok">
-          <li><a href="./en/our-story">Our Story</a></li>
-          <li><a href="./en/moments">Moments</a></li>
-          <li><a href="./en/gallery">Gallery</a></li>
-          <li><a href="./en/contact">Contact</a></li>
-        </ul>
-        <div class="language-account-menu svelte-rfuq4y">
-          <a class="login svelte-rfuq4y" href="./en/rsvp">RSVP</a>
-          <a class="create svelte-rfuq4y" href="./en/say-hello">Say Hello</a>
-        </div>
-      </nav>
-    </div>
-
-    <main id="main" class="svelte-1br2sqw">
-      <div class="content-grid">
-        
-        <section class="deep-rose svelte-9mqggi">
-          <div class="svelte-9mqggi">
-            <h1 class="svelte-9mqggi">Love is the best privacy</h1>
-            <div class="text svelte-9mqggi">
-              <p>Two souls, one journey. Join us in celebrating our beginning.</p>
-              <div class="buttons svelte-9mqggi">
-                <a class="button svelte-v2u8gk" data-size="medium" data-variant="secondary" href="./en/date-details">View Details</a>
-                <a class="button svelte-v2u8gk" data-size="medium" data-variant="tertiary" href="./en/send-wishes">Send Wishes</a>
+      </div>
+      
+      <div class="container clearfix tl_page_container tl_main_page_container">
+        <div class="tl_page">
+          <div class="tl_main_wrap">
+            <div class="tl_main_head">
+              <div class="tl_main_logo_wrap">
+                <a href="/" class="tl_main_logo">
+                  <div class="tl_main_logo" style="background-image: url('/img/union_logo.svg');"></div>
+                  <svg alt="Starlight Union" class="tl_main_logo_title_image" height="72" viewBox="0 0 288 72" width="288" xmlns="http://www.w3.org/2000/svg"></svg>
+                </a>
+                <p class="tl_main_logo_lead">A love story, shared with you.</p>
               </div>
             </div>
-            <a href="./en/our-first-photo" aria-label="Our first photo together" class="picture svelte-9mqggi">
-              <picture>
-                <source srcset="..." type="image/avif"/>
-                <source srcset="..." type="image/webp"/>
-                <img src="/assets/romantic-sunset-photo.jpg" alt="A romantic photo of the couple at sunset." class="svelte-9mqggi"/>
-              </picture>
-            </a>
-          </div>
-        </section>
+            
+            <div class="tl_main_download_mobile clearfix video_play">
+              <a href="/rsvp" class="tl_main_download_link tl_main_download_link_rose" data-track="Event/RSVP" onclick="trackDlClick(this, event)">
+                <i class="icon icon-heart-filled"></i>RSVP for **The Date**
+                <video class="tl_main_video_player tl_main_video_player__rose" muted="" vindex="1" preload="auto" autoplay="" loop="">
+                  <source src="/img/wedding_countdown_demo.mp4" type="video/mp4" />
+                </video>
+              </a>
+            </div>
+            
+            <div class="tl_main_recent_news_wrap tl_blog_list_page_wrap">
+              <h3 class="tl_main_recent_news_header">
+                <a href="/milestones">Our Milestones</a>
+              </h3>
+              <div class="tl_main_recent_news_cards clearfix">
+                <a class="dev_blog_card_link_wrap" href="/blog/the-proposal"><div class="dev_blog_card_wrap">
+                  <img class="dev_blog_card_image" src="https://starlightunion.com/file/proposal_photo.jpg" />
+                  <div class="dev_blog_card_alltext_wrap">
+                    <h4 class="dev_blog_card_title">She Said Yes! The Proposal Story</h4>
+                    <div class="dev_blog_card_lead">Read about the magical moment under the Northern Lights and how the question was finally popped...</div>
+                  </div>
+                  <div class="dev_blog_card_date">Oct 10, 2024</div>
+                </div></a>
+                <a class="dev_blog_card_link_wrap" href="/blog/first-date-anniversary"><div class="dev_blog_card_wrap">
+                  <img class="dev_blog_card_image" src="https://starlightunion.com/file/first_date_cafe.jpg" />
+                  <div class="dev_blog_card_alltext_wrap">
+                    <h4 class="dev_blog_card_title">Our First Anniversary: Back to Where It All Began</h4>
+                    <div class="dev_blog_card_lead">We revisited the little coffee shop and reminisced about that first, awkward, perfect moment...</div>
+                  </div>
+                  <div class="dev_blog_card_date">Aug 31, 2023</div>
+                </div></a>
+              </div>
+            </div>
 
-        <section class="light-ivory">
-          <div>
-            <h2>Finding the one is setting your heart free from searching</h2>
-            <a class="button svelte-v2u8gk" data-size="medium" data-variant="secondary" href="./en/why-we-matter">How We Met</a>
-          </div>
-        </section>
-
-        <section class="deep-violet">
-          <div class="breakout">
-            <div class="grid svelte-y789qh">
-              <div>
-                <h2>The Celebration</h2>
+            <div class="tl_main_download_mobile clearfix">
+              <h3 class="tl_main_download_desktop_header"></h3>
+              <a href="/registry" class="tl_main_download_link tl_main_download_link_gift" data-track="Action/Registry" onclick="trackDlClick(this, event)">
+                View **Wedding Registry**
+              </a>
+              <a class="tl_main_download_more_btn" href="/contact">Send a Note to the Couple<i class="icon icon-arrow-more"></i></a>
+              <div class="tl_main_download_desktop_wrap1">
+                <div class="tl_main_download_desktop_wrap">
+                  <div class="tl_main_download_desktop clearfix">
+                    <div class="tl_main_download_desktop_links clearfix">
+                      <a href="/location" class="tl_main_download_desktop_link tl_main_download_link_location" data-track="Details/Location" onclick="trackDlClick(this, event)">
+                        The **Venue**
+                      </a><a href="/accommodations" class="tl_main_download_desktop_link tl_main_download_link_sleep" data-track="Details/Sleep" onclick="trackDlClick(this, event)">
+                        Guest **Accommodations**
+                      </a>
+                    </div>
+                  </div>
                 </div>
-              <div class="plate svelte-3vws0z">
-                <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#FF5C77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                <h3 class="svelte-3vws0z">June 24, 2026</h3>
-                <ul class="svelte-3vws0z">
-                  <li>Starting at 4:00 PM</li>
-                  <li>The Grand Ballroom, City Hall</li>
-                  </ul>
-                <a class="button svelte-v2u8gk" data-size="medium" data-variant="secondary" href="./en/location-map">View Map</a>
               </div>
             </div>
-            <div class="svelte-b4a002">
-              <h3 class="svelte-b4a002">Dress Code:</h3>
-              <ul class="svelte-b4a002">
-                <li class="svelte-b4a002">
-                  <a href="./en/dress-code-info" class="svelte-b4a002">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"></circle><path d="M12 20v-2"></path><path d="M18.41 15.41l-1.83-1.83"></path><path d="M5.42 15.42l1.83-1.83"></path><path d="M12 18v2"></path><path d="M12 20a4 4 0 0 0 4-4v-1a3 3 0 0 0-6 0v1a4 4 0 0 0 4 4z"></path></svg>
-                    Semi-Formal Attire
-                  </a>
-                </li>
-                <li class="svelte-b4a002">
-                  <a href="./en/gifts-registry" class="svelte-b4a002">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"></path><path d="M2 10a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2H2v-2z"></path><path d="M12 2v6"></path><path d="M15 5h-6"></path></svg>
-                    Registry Details
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-        
-        </div>
-    </main>
 
-    </body>
+            <div class="tl_main_body tl_main_cards_animated_wrap">
+              <a name="what-can-you-do-with-Telegram"></a>
+              <h3 class="tl_main_body_header">Our Vows: Why We Chose Forever</h3>
+
+              <div class="tl_main_cards">
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_trust.tgs"><img src="/img/card_trust.png" /></picture>
+                    <h3 class="tl_main_card_header">Trust</h3>
+                    <div class="tl_main_card_lead">We believe in **open hearts** and shared vulnerabilities, building a foundation that is unbreakable.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_private.tgs"><img src="/img/card_private.png" /></picture>
+                    <h3 class="tl_main_card_header">Shared Dreams</h3>
+                    <div class="tl_main_card_lead">Our future is a collaborative project, where every goal is pursued **together** with passion.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_synced.tgs"><img src="/img/card_synced.png" /></picture>
+                    <h3 class="tl_main_card_header">Unwavering Support</h3>
+                    <div class="tl_main_card_lead">Through highs and lows, we promise to be the **anchor** and the wings for one another.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_fast.tgs"><img src="/img/card_fast.png" /></picture>
+                    <h3 class="tl_main_card_header">Endless Laughter</h3>
+                    <div class="tl_main_card_lead">Our connection is built on **joy** and a willingness to share a silly moment every single day.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_powerful.tgs"><img src="/img/card_powerful.png" /></picture>
+                    <h3 class="tl_main_card_header">Growth</h3>
+                    <div class="tl_main_card_lead">We commit to challenging each other to become the **best versions** of ourselves, side by side.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_open.tgs"><img src="/img/card_open.png" /></picture>
+                    <h3 class="tl_main_card_header">Forever Open</h3>
+                    <div class="tl_main_card_lead">Our home and our hearts will always be **open** to family and friends who share our joy.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_secure.tgs"><img src="/img/card_secure.png" /></picture>
+                    <h3 class="tl_main_card_header">Patience</h3>
+                    <div class="tl_main_card_lead">Love requires **patience** and kindness, a lesson we promise to practice daily.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_social.tgs"><img src="/img/card_social.png" /></picture>
+                    <h3 class="tl_main_card_header">Adventure</h3>
+                    <div class="tl_main_card_lead">The world is our stage, and we look forward to a lifetime of **adventures** together.</div>
+                  </div>
+                </div>
+
+                <div class="tl_main_card_cell">
+                  <div class="tl_main_card_wrap">
+                    <picture class="dev_page_tgsticker tl_main_card_animated js-tgsticker_image">
+                      <source type="application/x-tgsticker" srcset="/file/tgsticker_expressive.tgs"><img src="/img/card_expressive.png" /></picture>
+                    <h3 class="tl_main_card_header">Commitment</h3>
+                    <div class="tl_main_card_lead">This is more than a message; it’s a **lifelong promise** to love and cherish.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="tl_main_noshare clearfix"></div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer_wrap">
+      <div class="footer_columns_wrap footer_desktop">
+        <div class="footer_column footer_column_telegram">
+          <h5>Starlight Union</h5>
+          <div class="footer_telegram_description"></div>
+          Our journey is a shared destination, built on the foundations of trust, joy, and endless commitment.
+        </div>
+
+        <div class="footer_column">
+          <h5><a href="/details">Details</a></h5>
+          <ul>
+            <li><a href="/location">Venue</a></li>
+            <li><a href="/accommodations">Hotels</a></li>
+            <li><a href="/dress-code">Dress Code</a></li>
+          </ul>
+        </div>
+        <div class="footer_column">
+          <h5><a href="/gallery">Moments</a></h5>
+          <ul>
+            <li><a href="/gallery#engagement">Engagement</a></li>
+            <li><a href="/gallery#travels">Travels</a></li>
+            <li><a href="/gallery#childhood">Childhood</a></li>
+          </ul>
+        </div>
+        <div class="footer_column">
+          <h5><a href="/rsvp">Connect</a></h5>
+          <ul>
+            <li><a href="/rsvp">RSVP</a></li>
+            <li><a href="/registry">Registry</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer_column footer_column_platform">
+          <h5><a href="/platform">Thanks</a></h5>
+          <ul>
+            <li><a href="/platform#vendors">Vendors</a></li>
+            <li><a href="/platform#family">Family</a></li>
+            <li><a href="/platform#friends">Friends</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer_columns_wrap footer_mobile">
+        <div class="footer_column"><h5><a href="/journey">Our Journey</a></h5></div>
+        <div class="footer_column"><h5><a href="/milestones">Milestones</a></h5></div>
+        <div class="footer_column"><h5><a href="/details">Details</a></h5></div>
+        <div class="footer_column"><h5><a href="/rsvp">RSVP</a></h5></div>
+      </div>
+    </div>
+    
+    <script src="/js/main.js"></script>
+    <script src="/js/tgsticker.js"></script>
+    <script>mainInitLogo("\/img\/heart_logo_sprite.svg");
+mainInitTgStickers({"maxDeviceRatio":2,"cachingModulo":3,"unsupportedURL":"\/?notgs=1"});
+backToTopInit("Back to Us");
+removePreloadInit();
+</script>
+  </body>
 </html>
