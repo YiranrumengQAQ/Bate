@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超可自定义智能水印工具</title>
+    <title>Fluent UI 智能水印工具</title>
+    
     <style>
-        /* 1. 全局和基础样式 - 支持暗/亮主题 */
+        /* 1. 全局和基础样式 - Microsoft Fluent 风格 */
         :root {
-            --primary-color: #4a90e2;
-            --primary-hover: #5aa0f2;
-            --success-color: #28a745;
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            /* 主色调 */
+            --primary-color: #0078d4; /* 微软 Fluent 蓝 */
+            --primary-hover: #005a9e; /* 悬停加深 */
+            --primary-focus-ring: rgba(0, 120, 212, 0.3); /* 聚焦光环 */
+            --success-color: #107c10; /* 微软成功绿 */
             
-            /* 默认亮色主题 */
-            --bg-color: #f0f2f5;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --text-muted: #666666;
-            --border-color: #dddddd;
-            --input-bg: #f9f9f9;
+            /* 字体 */
+            --font-main: "Segoe UI V2", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+            
+            /* 默认亮色主题 (类似 Microsoft 365) */
+            --bg-color: #f5f5f5;         /* 浅灰背景 */
+            --card-color: #ffffff;       /* 白色面板 */
+            --text-color: #1c1c1c;       /* 近黑色文本 */
+            --text-muted: #606060;       /* 灰色 muted 文本 */
+            --border-color: #e1e1e1;     /* 浅灰边框 */
+            --input-bg: #ffffff;         /* 输入框背景 */
         }
 
         /* 暗色主题适配 */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #1a1a1d;
-                --card-color: #2c2c34;
-                --text-color: #f0f0f5;
-                --text-muted: #888890;
-                --border-color: #44444b;
-                --input-bg: #1a1a1d;
+                --bg-color: #1c1c1c;         /* 深灰背景 */
+                --card-color: #2d2d2d;       /* 面板颜色 */
+                --text-color: #f1f1f1;       /* 亮色文本 */
+                --text-muted: #a1a1a1;       /* 灰色 muted 文本 */
+                --border-color: #444444;     /* 暗色边框 */
+                --input-bg: #252525;         /* 输入框背景 */
             }
         }
 
@@ -65,13 +70,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 3. 控制面板 */
+        /* 3. 控制面板 (Fluent 卡片风格) */
         #controls-panel {
             background: var(--card-color);
-            border-radius: 12px;
+            border-radius: 8px; /* Fluent 圆角 */
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Fluent 阴影 */
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -79,13 +84,14 @@
         }
         @media (prefers-color-scheme: dark) {
             #controls-panel {
-                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             }
         }
 
         #controls-panel h2 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
+            color: var(--text-color); /* 不用主色，用标准文本色 */
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color); /* 更微妙的分隔线 */
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
@@ -95,15 +101,22 @@
             flex-direction: column;
             gap: 10px;
         }
+        
+        .control-group label {
+            font-weight: 600; /* Fluent 标签加粗 */
+            font-size: 0.875rem; /* 14px */
+            color: var(--text-color); /* 标签更清晰 */
+            margin-bottom: 0;
+        }
 
-        /* 4. 预览区域 */
+        /* 4. 预览区域 (Fluent 卡片风格) */
         #preview-area {
             background: var(--card-color);
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
             display: flex;
             justify-content: center;
-            align: center;
+            align-items: center;
             overflow: hidden;
             position: relative;
             min-height: 300px;
@@ -123,7 +136,7 @@
             max-width: 100%;
             max-height: 70vh;
             display: block;
-            border-radius: 8px;
+            border-radius: 6px;
             user-select: none;
         }
         
@@ -144,8 +157,7 @@
             text-shadow: 0 0 3px rgba(0,0,0,0.4);
             user-select: none;
             white-space: nowrap; 
-            transition: transform 0.1s ease-out; /* 平滑旋转 */
-            /* 关键：让旋转和定位的基准点在左上角 */
+            transition: transform 0.1s ease-out;
             transform-origin: top left;
         }
         @media (prefers-color-scheme: dark) {
@@ -161,7 +173,7 @@
                 height: 100%;
             }
             #app-container {
-                grid-template-columns: 380px 1fr; /* 增加控制面板宽度 */
+                grid-template-columns: 380px 1fr;
                 grid-template-rows: 1fr;
                 height: 100vh;
                 padding: 20px;
@@ -170,11 +182,11 @@
             #controls-panel {
                 overflow-y: auto;
                 padding: 24px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.05);
             }
             @media (prefers-color-scheme: dark) {
                 #controls-panel {
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
                 }
             }
             #preview-area {
@@ -186,51 +198,47 @@
             }
         }
 
-        /* 6. 美观的表单控件 (通用) */
-        .control-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
+        /* 6. 表单控件 (Fluent 风格) */
         input[type="text"],
         input[type="number"],
         select {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Fluent 控件 padding 稍小 */
             background: var(--input-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 6px; /* Fluent 圆角 */
             color: var(--text-color);
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 0.95rem;
+            font-family: var(--font-main);
+            transition: border-color 0.2s, box-shadow 0.2s;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
         }
         
-        /* 为 select 添加箭头 */
+        /* Fluent 下拉箭头 */
         select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23606060' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.7rem center;
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
         }
         @media (prefers-color-scheme: dark) {
             select {
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1a1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             }
         }
 
-
+        /* 关键：Fluent 聚焦样式 */
         input[type="text"]:focus,
         input[type="number"]:focus,
         select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+            box-shadow: 0 0 0 2px var(--primary-focus-ring);
         }
 
+        /* Fluent 滑块 */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -254,68 +262,107 @@
             background: var(--primary-hover);
         }
         
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        /* 颜色选择器 */
+        .color-picker-wrapper { display: flex; align-items: center; gap: 10px; }
         input[type="color"] {
             -webkit-appearance: none;
-            width: 40px;
-            height: 40px;
+            width: 38px; /* 调整大小 */
+            height: 38px;
             border: none;
             padding: 0;
-            border-radius: 8px;
+            border-radius: 6px;
             background-color: transparent;
             cursor: pointer;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch {
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
         }
 
-        /* 7. 美观的按钮 (通用) */
+        /* 7. 按钮 (Fluent 风格) */
         .btn {
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: 600; /* Semibold */
+            border: 1px solid transparent; /* 统一边框占位 */
+            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.3s, box-shadow 0.3s;
+            transition: transform 0.1s ease, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
             text-align: center;
         }
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
         }
-        @media (prefers-color-scheme: dark) {
-            .btn:hover {
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            }
+        .btn:active { 
+            transform: translateY(0); 
         }
-        .btn:active { transform: translateY(0); }
+        /* 聚焦环 */
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--primary-focus-ring);
+        }
 
-        .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-success { background: var(--success-color); color: white; }
-        .btn-success:hover { background: #2dab4a; }
-        .btn-secondary { background: var(--border-color); color: var(--text-color); }
-        .btn-secondary:hover { background: #cccccc; }
-        @media (prefers-color-scheme: dark) {
-            .btn-secondary { background: #55556c; color: var(--text-color); }
-            .btn-secondary:hover { background: #66667d; }
+        /* 主按钮 (实心蓝) */
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            border-color: var(--primary-color);
+        }
+        .btn-primary:hover { 
+            background: var(--primary-hover); 
+            border-color: var(--primary-hover);
+        }
+
+        /* 成功按钮 (实心绿) */
+        .btn-success { 
+            background: var(--success-color); 
+            color: white; 
+            border-color: var(--success-color);
+        }
+        .btn-success:hover { 
+            background: #0d5c0d; 
+            border-color: #0d5c0d;
+        }
+        
+        /* 次要按钮 (白底灰边) */
+        .btn-secondary { 
+            background: var(--card-color); 
+            color: var(--text-color); 
+            border-color: var(--border-color);
+        }
+        .btn-secondary:hover { 
+            background: var(--bg-color); /* 悬停时用背景色 */
+            border-color: var(--text-muted);
+        }
+        
+        /* 信息按钮 (白底蓝边) */
+        .btn-info {
+            background: var(--card-color);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-info:hover {
+            background: var(--input-bg); /* 用输入框背景色 */
         }
 
         input[type="file"] { display: none; }
+        
+        #final-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        #final-actions .btn-success {
+            grid-column: 1 / -1; /* 下载按钮占据整行 */
+        }
 
-        /* 8. 进度条 (通用) */
+        /* 8. 进度条 (Fluent 风格) */
         .progress-bar-container {
             width: 100%;
             background: var(--border-color);
-            border-radius: 8px;
-            height: 20px;
+            border-radius: 4px;
+            height: 8px; /* Fluent 进度条更细 */
             overflow: hidden;
             display: none;
             margin-top: 10px;
@@ -324,7 +371,7 @@
             width: 0;
             height: 100%;
             background: var(--primary-color);
-            border-radius: 8px;
+            border-radius: 4px;
             transition: width 0.4s ease;
         }
         .progress-bar.loading {
@@ -406,8 +453,12 @@
             </div>
             
             <div class="control-group" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                <button id="reset-btn" class="btn btn-secondary">恢复默认设置</button>
-                <button id="download-btn" class="btn btn-success">生成并下载图片</button>
+                <div id="final-actions">
+                    <button id="smart-adapt-btn" class="btn btn-info">智能适配 (底部居中)</button>
+                    <button id="reset-btn" class="btn btn-secondary">恢复默认 (左上角)</button>
+                    
+                    <button id="download-btn" class="btn btn-success">生成并下载图片</button>
+                </div>
                 <div class="progress-bar-container" id="download-progress-container">
                     <div class="progress-bar" id="download-progress"></div>
                 </div>
@@ -429,7 +480,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- 1. 获取所有DOM元素 (包括新增的) ---
+            // --- 1. 获取所有DOM元素 ---
             const uploadBtn = document.getElementById('upload-btn');
             const previewImage = document.getElementById('preview-image');
             const watermarkPreview = document.getElementById('watermark-preview');
@@ -452,6 +503,7 @@
             const posYValue = document.getElementById('pos-y-value');
             
             const resetBtn = document.getElementById('reset-btn');
+            const smartAdaptBtn = document.getElementById('smart-adapt-btn');
             const downloadBtn = document.getElementById('download-btn');
             
             const uploadProgressContainer = document.getElementById('upload-progress-container');
@@ -459,8 +511,8 @@
             const downloadProgressContainer = document.getElementById('download-progress-container');
             const downloadProgressBar = document.getElementById('download-progress');
 
-            let originalImage = null; // 存储原始图片对象
-            let currentFile = null;   // 存储当前文件
+            let originalImage = null;
+            let currentFile = null;
 
             // --- 2. 辅助函数 ---
             function getFormattedDateTime() {
@@ -470,7 +522,6 @@
                 const day = now.getDate().toString().padStart(2, '0');
                 const hours = now.getHours().toString().padStart(2, '0');
                 const minutes = now.getMinutes().toString().padStart(2, '0');
-                // 2025年11月14日 10:11 (完全匹配您的格式)
                 return `${year}年${month}月${day}日 ${hours}:${minutes}`;
             }
 
@@ -490,19 +541,39 @@
                 }, 1500);
             }
             
-            // --- 3. 核心功能：智能默认与更新 ---
+            // --- 3. 核心功能：两种默认模式 ---
 
             /**
-             * 智能默认：根据图片尺寸设置默认水印
-             * 新逻辑：默认位置为 "底部居中"
+             * 模式一：固定默认 (左上角)
              */
-            function applySmartDefaults() {
-                // 通用默认值
+            function applyFixedDefault() {
                 textInput.value = getFormattedDateTime();
                 fontColorInput.value = '#FFFFFF';
-                fontColorHex.value = '#FFFFFF';
                 opacityInput.value = 0.7;
-                fontFamilyInput.value = fontFamilyInput.options[0].value; // 默认字体
+                fontFamilyInput.value = fontFamilyInput.options[0].value;
+                fontWeightInput.value = 'normal';
+                rotationInput.value = 0;
+                fontSizeInput.value = 30;
+                posXInput.value = 10;
+                posYInput.value = 10;
+                
+                if (originalImage) {
+                    posXInput.max = originalImage.width;
+                    posYInput.max = originalImage.height;
+                }
+                
+                updateControlValues();
+                updatePreview();
+            }
+
+            /**
+             * 模式二：智能适配 (底部居中)
+             */
+            function applySmartAdaptLogic() {
+                textInput.value = getFormattedDateTime();
+                fontColorInput.value = '#FFFFFF';
+                opacityInput.value = 0.7;
+                fontFamilyInput.value = fontFamilyInput.options[0].value;
                 fontWeightInput.value = 'normal';
                 rotationInput.value = 0;
 
@@ -510,22 +581,15 @@
                     const imgWidth = originalImage.width;
                     const imgHeight = originalImage.height;
 
-                    // --- 智能字体大小 ---
-                    // 适配不同类型图片：基于图片宽度计算
                     let smartFontSize = Math.round(imgWidth / 35);
-                    smartFontSize = Math.max(16, Math.min(smartFontSize, 60)); // 限制范围
+                    smartFontSize = Math.max(16, Math.min(smartFontSize, 60));
                     fontSizeInput.value = smartFontSize;
 
-                    // --- 智能位置 (底部居中) ---
-                    const paddingY = imgHeight * 0.02; // 底部 2% 边距
-                    
-                    // 估算文本宽度 (这是一个近似值，用于设置默认X)
+                    const paddingY = imgHeight * 0.02;
                     const estimatedTextWidth = textInput.value.length * (smartFontSize * 0.55);
-                    
                     let smartPosX = (imgWidth / 2) - (estimatedTextWidth / 2);
-                    let smartPosY = imgHeight - smartFontSize - paddingY; // Y 坐标代表 "顶部"
+                    let smartPosY = imgHeight - smartFontSize - paddingY;
 
-                    // 确保不超出边界
                     smartPosX = Math.max(0, smartPosX);
                     smartPosY = Math.max(0, smartPosY);
                     
@@ -533,7 +597,6 @@
                     posYInput.value = smartPosY;
                     
                 } else {
-                    // 无图时的默认值
                     fontSizeInput.value = 30;
                     posXInput.value = 10;
                     posYInput.value = 10;
@@ -544,11 +607,11 @@
             }
 
             /**
-             * 更新预览区域的水印
+             * 更新预览
              */
             function updatePreview() {
                 if (!originalImage || !previewImage.src) {
-                    watermarkPreview.innerText = ''; // 没有图片则清除水印
+                    watermarkPreview.innerText = '';
                     return;
                 }
 
@@ -560,26 +623,24 @@
                 const weight = fontWeightInput.value;
                 const rotation = rotationInput.value;
                 
-                // 计算预览缩放比例
                 const scaleX = previewImage.width / originalImage.width;
                 const scaleY = previewImage.height / originalImage.height;
                 const scale = Math.min(scaleX, scaleY);
 
-                // 缩放坐标
                 const x = posXInput.value * scale;
                 const y = posYInput.value * scale;
 
                 watermarkPreview.style.font = `${weight} ${size * scale}px ${family}`;
                 watermarkPreview.style.color = color;
                 watermarkPreview.style.opacity = opacity;
-                watermarkPreview.style.left = `${x}px`;
+                waterplay.style.left = `${x}px`;
                 watermarkPreview.style.top = `${y}px`;
-                watermarkPreview.style.transform = `rotate(${rotation}deg)`; // 应用旋转
+                watermarkPreview.style.transform = `rotate(${rotation}deg)`;
                 watermarkPreview.innerText = text;
             }
 
             /**
-             * 更新所有滑块/颜色选择器旁的数值显示
+             * 更新滑块文本
              */
             function updateControlValues() {
                 fontSizeValue.innerText = fontSizeInput.value;
@@ -591,8 +652,6 @@
             }
 
             // --- 4. 事件监听器 ---
-
-            // A. 文件上传
             uploadBtn.addEventListener('change', (e) => {
                 currentFile = e.target.files[0];
                 if (currentFile) {
@@ -605,34 +664,22 @@
                                 previewImage.style.display = 'block';
                                 placeholderText.style.display = 'none';
 
-                                // 更新滑块最大值以匹配原始图片尺寸
                                 posXInput.max = originalImage.width;
-                                // 允许Y轴滑出图片（例如旋转时）
-                                posYInput.max = originalImage.height * 1.2; 
+                                posYInput.max = originalImage.height * 1.2;
                                 
-                                // 应用 "底部居中" 智能默认值
-                                applySmartDefaults();
+                                applySmartAdaptLogic(); 
                                 
                                 setTimeout(updatePreview, 100); 
                             };
-                            originalImage.onerror = () => {
-                                alert('图片加载失败，请检查文件是否为有效图片。');
-                                previewImage.src = '';
-                                previewImage.style.display = 'none';
-                                placeholderText.style.display = 'block';
-                                originalImage = null;
-                                currentFile = null;
-                                watermarkPreview.innerText = '';
-                            };
+                            originalImage.onerror = () => { alert('图片加载失败'); };
                             originalImage.src = event.target.result;
                         };
-                        reader.onerror = () => { alert('文件读取失败，请重试。'); currentFile = null; };
+                        reader.onerror = () => { alert('文件读取失败'); };
                         reader.readAsDataURL(currentFile);
                     });
                 }
             });
 
-            // B. 所有自定义控件
             const controls = [
                 textInput, fontSizeInput, fontColorInput, opacityInput, 
                 fontFamilyInput, fontWeightInput, rotationInput, 
@@ -645,10 +692,9 @@
                 });
             });
             
-            // C. 恢复默认
-            resetBtn.addEventListener('click', applySmartDefaults);
+            resetBtn.addEventListener('click', applyFixedDefault);
+            smartAdaptBtn.addEventListener('click', applySmartAdaptLogic);
 
-            // D. 下载 (关键：添加旋转逻辑)
             downloadBtn.addEventListener('click', () => {
                 if (!originalImage) {
                     alert('请先上传一张图片！');
@@ -657,17 +703,13 @@
                 
                 showSimulatedProgress(downloadProgressContainer, downloadProgressBar, () => {
                     const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('20d');
+                    const ctx = canvas.getContext('2d');
                     canvas.width = originalImage.width;
                     canvas.height = originalImage.height;
                     
-                    // 1. 绘制原始图片
                     ctx.drawImage(originalImage, 0, 0);
-                    
-                    // 2. 保存当前画布状态
                     ctx.save();
                     
-                    // 3. 设置水印样式
                     const x = parseFloat(posXInput.value);
                     const y = parseFloat(posYInput.value);
                     const angleInRadians = parseFloat(rotationInput.value) * Math.PI / 180;
@@ -676,23 +718,14 @@
                     ctx.fillStyle = fontColorInput.value;
                     ctx.globalAlpha = opacityInput.value;
                     
-                    // 4. 计算 Y 轴基线 (让 Y 坐标代表文本顶部)
                     const metrics = ctx.measureText(textInput.value);
                     const yBaseline = y + metrics.actualBoundingBoxAscent;
 
-                    // 5. 移动并旋转画布
-                    // 移动画布原点到 (x, yBaseline)
                     ctx.translate(x, yBaseline);
-                    // 绕新原点旋转
                     ctx.rotate(angleInRadians);
-                    
-                    // 6. 在新原点 (0, 0) 绘制文本
                     ctx.fillText(textInput.value, 0, 0);
-                    
-                    // 7. 恢复画布到 save() 之前的状态
                     ctx.restore();
 
-                    // 8. 生成并下载
                     const dataUrl = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.href = dataUrl;
@@ -708,7 +741,7 @@
             previewImage.addEventListener('load', updatePreview);
 
             // --- 6. 初始化 ---
-            applySmartDefaults(); // 页面加载时即应用默认值（无图状态）
+            applySmartAdaptLogic(); 
         });
     </script>
 
