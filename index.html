@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluent UI 智能水印工具</title>
+    <title>Fluent UI 智能水印工具 (含分享赞助)</title>
     
     <style>
+        /* [CSS 样式与上一版相同，仅在底部增加 Footer 样式] */
         /* 1. 全局和基础样式 - Microsoft Fluent 风格 */
         :root {
             /* 主色调 */
@@ -89,9 +90,9 @@
         }
 
         #controls-panel h2 {
-            color: var(--text-color); /* 不用主色，用标准文本色 */
+            color: var(--text-color);
             font-weight: 600;
-            border-bottom: 1px solid var(--border-color); /* 更微妙的分隔线 */
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
@@ -103,9 +104,9 @@
         }
         
         .control-group label {
-            font-weight: 600; /* Fluent 标签加粗 */
-            font-size: 0.875rem; /* 14px */
-            color: var(--text-color); /* 标签更清晰 */
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-color);
             margin-bottom: 0;
         }
 
@@ -175,7 +176,7 @@
             #app-container {
                 grid-template-columns: 380px 1fr;
                 grid-template-rows: 1fr;
-                height: 100vh;
+                height: calc(100vh - 50px); /* 留出底部空间给 footer */
                 padding: 20px;
                 gap: 20px;
             }
@@ -194,7 +195,7 @@
                 padding: 20px;
             }
             #preview-image {
-                max-height: calc(100vh - 80px);
+                max-height: calc(100vh - 80px - 50px); /* 调整预览图片最大高度 */
             }
         }
 
@@ -203,10 +204,10 @@
         input[type="number"],
         select {
             width: 100%;
-            padding: 10px; /* Fluent 控件 padding 稍小 */
+            padding: 10px;
             background: var(--input-bg);
             border: 1px solid var(--border-color);
-            border-radius: 6px; /* Fluent 圆角 */
+            border-radius: 6px;
             color: var(--text-color);
             font-size: 0.95rem;
             font-family: var(--font-main);
@@ -216,7 +217,6 @@
             appearance: none;
         }
         
-        /* Fluent 下拉箭头 */
         select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23606060' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.7rem center;
@@ -229,7 +229,6 @@
             }
         }
 
-        /* 关键：Fluent 聚焦样式 */
         input[type="text"]:focus,
         input[type="number"]:focus,
         select:focus {
@@ -238,7 +237,6 @@
             box-shadow: 0 0 0 2px var(--primary-focus-ring);
         }
 
-        /* Fluent 滑块 */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -262,11 +260,10 @@
             background: var(--primary-hover);
         }
         
-        /* 颜色选择器 */
         .color-picker-wrapper { display: flex; align-items: center; gap: 10px; }
         input[type="color"] {
             -webkit-appearance: none;
-            width: 38px; /* 调整大小 */
+            width: 38px;
             height: 38px;
             border: none;
             padding: 0;
@@ -284,8 +281,8 @@
         .btn {
             padding: 10px 16px;
             font-size: 0.95rem;
-            font-weight: 600; /* Semibold */
-            border: 1px solid transparent; /* 统一边框占位 */
+            font-weight: 600;
+            border: 1px solid transparent;
             border-radius: 6px;
             cursor: pointer;
             transition: transform 0.1s ease, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -297,13 +294,11 @@
         .btn:active { 
             transform: translateY(0); 
         }
-        /* 聚焦环 */
         .btn:focus-visible {
             outline: none;
             box-shadow: 0 0 0 3px var(--primary-focus-ring);
         }
 
-        /* 主按钮 (实心蓝) */
         .btn-primary { 
             background: var(--primary-color); 
             color: white; 
@@ -314,7 +309,6 @@
             border-color: var(--primary-hover);
         }
 
-        /* 成功按钮 (实心绿) */
         .btn-success { 
             background: var(--success-color); 
             color: white; 
@@ -325,26 +319,35 @@
             border-color: #0d5c0d;
         }
         
-        /* 次要按钮 (白底灰边) */
         .btn-secondary { 
             background: var(--card-color); 
             color: var(--text-color); 
             border-color: var(--border-color);
         }
         .btn-secondary:hover { 
-            background: var(--bg-color); /* 悬停时用背景色 */
+            background: var(--bg-color);
             border-color: var(--text-muted);
         }
         
-        /* 信息按钮 (白底蓝边) */
         .btn-info {
             background: var(--card-color);
             color: var(--primary-color);
             border-color: var(--primary-color);
         }
         .btn-info:hover {
-            background: var(--input-bg); /* 用输入框背景色 */
+            background: var(--input-bg);
         }
+        
+        .btn-preview {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .btn-preview:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
 
         input[type="file"] { display: none; }
         
@@ -353,16 +356,19 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+        #final-actions button {
+            grid-column: span 1;
+        }
         #final-actions .btn-success {
-            grid-column: 1 / -1; /* 下载按钮占据整行 */
+            grid-column: 1 / -1; 
         }
 
-        /* 8. 进度条 (Fluent 风格) */
+        /* 8. 进度条 */
         .progress-bar-container {
             width: 100%;
             background: var(--border-color);
             border-radius: 4px;
-            height: 8px; /* Fluent 进度条更细 */
+            height: 8px;
             overflow: hidden;
             display: none;
             margin-top: 10px;
@@ -378,6 +384,43 @@
             width: 100%;
             transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
+
+        /* 9. 新增 Footer 样式 */
+        footer {
+            background-color: var(--card-color);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px; /* 链接之间的间距 */
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* 调整整体布局，让 footer 始终在底部 */
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #app-container {
+            flex-grow: 1; /* 让主内容区域占据剩余空间 */
+        }
+
 
     </style>
 </head>
@@ -457,6 +500,7 @@
                     <button id="smart-adapt-btn" class="btn btn-info">智能适配 (底部居中)</button>
                     <button id="reset-btn" class="btn btn-secondary">恢复默认 (左上角)</button>
                     
+                    <button id="online-preview-btn" class="btn btn-preview">在线预览</button>
                     <button id="download-btn" class="btn btn-success">生成并下载图片</button>
                 </div>
                 <div class="progress-bar-container" id="download-progress-container">
@@ -476,6 +520,11 @@
         </section>
 
     </main>
+
+    <footer>
+        <a href="#" id="share-website-btn">分享网站</a>
+        <a href="https://imgbox.com/jRusEHe7" target="_blank" rel="noopener noreferrer">赞助我们</a>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -504,15 +553,18 @@
             
             const resetBtn = document.getElementById('reset-btn');
             const smartAdaptBtn = document.getElementById('smart-adapt-btn');
+            const onlinePreviewBtn = document.getElementById('online-preview-btn');
             const downloadBtn = document.getElementById('download-btn');
+            const shareWebsiteBtn = document.getElementById('share-website-btn'); // 新增分享按钮
             
             const uploadProgressContainer = document.getElementById('upload-progress-container');
             const uploadProgressBar = document.getElementById('upload-progress');
             const downloadProgressContainer = document.getElementById('download-progress-container');
             const downloadProgressBar = document.getElementById('download-progress');
 
-            let originalImage = null;
-            let currentFile = null;
+            let originalImage = null; // 存储用户上传的原始图片 Image 对象
+            let currentFile = null;   // 存储用户上传的原始文件
+            let isPreviewingWatermarked = false; // 新状态：是否正在预览带水印的图片
 
             // --- 2. 辅助函数 ---
             function getFormattedDateTime() {
@@ -540,6 +592,42 @@
                     }, 500);
                 }, 1500);
             }
+
+            /**
+             * 绘制水印到 Canvas 并返回数据 URL
+             * @param {HTMLImageElement} img - 要添加水印的图片对象
+             * @returns {string} 带有水印图片的 Data URL
+             */
+            function drawWatermarkToCanvas(img) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                ctx.drawImage(img, 0, 0);
+                ctx.save(); // 保存当前画布状态
+
+                const x = parseFloat(posXInput.value);
+                const y = parseFloat(posYInput.value);
+                const angleInRadians = parseFloat(rotationInput.value) * Math.PI / 180;
+                
+                // 设置水印样式
+                ctx.font = `${fontWeightInput.value} ${fontSizeInput.value}px ${fontFamilyInput.value}`;
+                ctx.fillStyle = fontColorInput.value;
+                ctx.globalAlpha = opacityInput.value;
+                
+                // 计算 Y 轴基线
+                const metrics = ctx.measureText(textInput.value);
+                const yBaseline = y + metrics.actualBoundingBoxAscent;
+
+                // 移动并旋转画布
+                ctx.translate(x, yBaseline);
+                ctx.rotate(angleInRadians);
+                ctx.fillText(textInput.value, 0, 0);
+                
+                ctx.restore(); // 恢复画布状态，防止对后续绘制操作产生影响
+                return canvas.toDataURL('image/png');
+            }
             
             // --- 3. 核心功能：两种默认模式 ---
 
@@ -560,6 +648,14 @@
                 if (originalImage) {
                     posXInput.max = originalImage.width;
                     posYInput.max = originalImage.height;
+                    // 如果有图片，恢复预览图为原始图片
+                    previewImage.src = originalImage.src;
+                    isPreviewingWatermarked = false; // 重置状态
+                } else {
+                    // 无图状态
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                    placeholderText.style.display = 'block';
                 }
                 
                 updateControlValues();
@@ -595,11 +691,18 @@
                     
                     posXInput.value = smartPosX;
                     posYInput.value = smartPosY;
-                    
+
+                    // 如果有图片，恢复预览图为原始图片
+                    previewImage.src = originalImage.src;
+                    isPreviewingWatermarked = false; // 重置状态
                 } else {
                     fontSizeInput.value = 30;
                     posXInput.value = 10;
                     posYInput.value = 10;
+                    // 无图状态
+                    previewImage.src = '';
+                    previewImage.style.display = 'none';
+                    placeholderText.style.display = 'block';
                 }
                 
                 updateControlValues();
@@ -607,12 +710,22 @@
             }
 
             /**
-             * 更新预览
+             * 更新预览区域的水印
+             * 关键：根据 isPreviewingWatermarked 状态决定是否显示动态水印预览
              */
             function updatePreview() {
                 if (!originalImage || !previewImage.src) {
                     watermarkPreview.innerText = '';
+                    watermarkPreview.style.display = 'none'; // 隐藏水印预览
                     return;
+                }
+
+                // 如果正在预览已加水印的图片，则隐藏动态水印预览
+                if (isPreviewingWatermarked) {
+                    watermarkPreview.style.display = 'none';
+                    return;
+                } else {
+                    watermarkPreview.style.display = 'block'; // 否则显示动态水印
                 }
 
                 const text = textInput.value;
@@ -623,127 +736,17 @@
                 const weight = fontWeightInput.value;
                 const rotation = rotationInput.value;
                 
+                // 计算预览缩放比例
+                // 这里用原始图片尺寸来计算，因为 previewImage.src 可能会变成加水印的图
+                // 如果是已加水印的图，它的尺寸仍应与 originalImage 相同，
+                // 但为了确保缩放比例准确对应到原始图片，这里最好始终参考 originalImage.width/height
                 const scaleX = previewImage.width / originalImage.width;
                 const scaleY = previewImage.height / originalImage.height;
-                const scale = Math.min(scaleX, scaleY);
+                const scale = Math.min(scaleX, scaleY); // 使用较小的比例确保整个图片可见
 
+                // 缩放坐标
                 const x = posXInput.value * scale;
                 const y = posYInput.value * scale;
 
-                watermarkPreview.style.font = `${weight} ${size * scale}px ${family}`;
-                watermarkPreview.style.color = color;
-                watermarkPreview.style.opacity = opacity;
-                waterplay.style.left = `${x}px`;
-                watermarkPreview.style.top = `${y}px`;
-                watermarkPreview.style.transform = `rotate(${rotation}deg)`;
-                watermarkPreview.innerText = text;
-            }
+                watermarkPreview.style.font = `${weight}
 
-            /**
-             * 更新滑块文本
-             */
-            function updateControlValues() {
-                fontSizeValue.innerText = fontSizeInput.value;
-                opacityValue.innerText = opacityInput.value;
-                rotationValue.innerText = rotationInput.value;
-                posXValue.innerText = Math.round(posXInput.value);
-                posYValue.innerText = Math.round(posYInput.value);
-                fontColorHex.value = fontColorInput.value;
-            }
-
-            // --- 4. 事件监听器 ---
-            uploadBtn.addEventListener('change', (e) => {
-                currentFile = e.target.files[0];
-                if (currentFile) {
-                    showSimulatedProgress(uploadProgressContainer, uploadProgressBar, () => {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            originalImage = new Image();
-                            originalImage.onload = () => {
-                                previewImage.src = event.target.result;
-                                previewImage.style.display = 'block';
-                                placeholderText.style.display = 'none';
-
-                                posXInput.max = originalImage.width;
-                                posYInput.max = originalImage.height * 1.2;
-                                
-                                applySmartAdaptLogic(); 
-                                
-                                setTimeout(updatePreview, 100); 
-                            };
-                            originalImage.onerror = () => { alert('图片加载失败'); };
-                            originalImage.src = event.target.result;
-                        };
-                        reader.onerror = () => { alert('文件读取失败'); };
-                        reader.readAsDataURL(currentFile);
-                    });
-                }
-            });
-
-            const controls = [
-                textInput, fontSizeInput, fontColorInput, opacityInput, 
-                fontFamilyInput, fontWeightInput, rotationInput, 
-                posXInput, posYInput
-            ];
-            controls.forEach(control => {
-                control.addEventListener('input', () => {
-                    updateControlValues();
-                    updatePreview();
-                });
-            });
-            
-            resetBtn.addEventListener('click', applyFixedDefault);
-            smartAdaptBtn.addEventListener('click', applySmartAdaptLogic);
-
-            downloadBtn.addEventListener('click', () => {
-                if (!originalImage) {
-                    alert('请先上传一张图片！');
-                    return;
-                }
-                
-                showSimulatedProgress(downloadProgressContainer, downloadProgressBar, () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = originalImage.width;
-                    canvas.height = originalImage.height;
-                    
-                    ctx.drawImage(originalImage, 0, 0);
-                    ctx.save();
-                    
-                    const x = parseFloat(posXInput.value);
-                    const y = parseFloat(posYInput.value);
-                    const angleInRadians = parseFloat(rotationInput.value) * Math.PI / 180;
-                    
-                    ctx.font = `${fontWeightInput.value} ${fontSizeInput.value}px ${fontFamilyInput.value}`;
-                    ctx.fillStyle = fontColorInput.value;
-                    ctx.globalAlpha = opacityInput.value;
-                    
-                    const metrics = ctx.measureText(textInput.value);
-                    const yBaseline = y + metrics.actualBoundingBoxAscent;
-
-                    ctx.translate(x, yBaseline);
-                    ctx.rotate(angleInRadians);
-                    ctx.fillText(textInput.value, 0, 0);
-                    ctx.restore();
-
-                    const dataUrl = canvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.href = dataUrl;
-                    link.download = `watermarked_${new Date().getTime()}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            });
-            
-            // --- 5. 响应式与加载支持 ---
-            window.addEventListener('resize', updatePreview);
-            previewImage.addEventListener('load', updatePreview);
-
-            // --- 6. 初始化 ---
-            applySmartAdaptLogic(); 
-        });
-    </script>
-
-</body>
-</html>
