@@ -3,19 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级响应式水印工具 (PC/PE)</title>
+    <title>超可自定义智能水印工具</title>
     <style>
-        /* 1. 全局和基础样式 (美观的基础) */
+        /* 1. 全局和基础样式 - 支持暗/亮主题 */
         :root {
-            --bg-color: #1a1a1d;
-            --card-color: #2c2c34;
             --primary-color: #4a90e2;
             --primary-hover: #5aa0f2;
-            --text-color: #f0f0f5;
-            --text-muted: #888890;
-            --border-color: #44444b;
             --success-color: #28a745;
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            
+            /* 默认亮色主题 */
+            --bg-color: #f0f2f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --border-color: #dddddd;
+            --input-bg: #f9f9f9;
+        }
+
+        /* 暗色主题适配 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1d;
+                --card-color: #2c2c34;
+                --text-color: #f0f0f5;
+                --text-muted: #888890;
+                --border-color: #44444b;
+                --input-bg: #1a1a1d;
+            }
         }
 
         * {
@@ -26,23 +41,20 @@
 
         html, body {
             width: 100%;
-            min-height: 100%; /* 保证移动端内容能撑开页面 */
+            min-height: 100%;
             font-family: var(--font-main);
             background-color: var(--bg-color);
             color: var(--text-color);
             font-size: 16px;
         }
 
-        /*
-         * 2. 响应式布局 (PE - 移动端优先)
-         * 这是默认布局：单列、垂直堆叠
-        */
+        /* 2. 响应式布局 (PE - 移动端优先) */
         #app-container {
             display: grid;
-            grid-template-columns: 1fr; /* 移动端：单列 */
-            grid-template-rows: auto auto; /* 移动端：两行，自动高度 */
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
             width: 100%;
-            height: auto; /* 移动端：高度自动 */
+            height: auto;
             gap: 15px;
             padding: 15px;
             animation: fadeInApp 0.6s ease-out;
@@ -53,17 +65,22 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 3. 侧边栏 - 控制面板 (PE 样式) */
+        /* 3. 控制面板 */
         #controls-panel {
             background: var(--card-color);
             border-radius: 12px;
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             gap: 20px;
-            overflow-y: visible; /* 移动端不需要内部滚动 */
+            overflow-y: visible;
+        }
+        @media (prefers-color-scheme: dark) {
+            #controls-panel {
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            }
         }
 
         #controls-panel h2 {
@@ -79,18 +96,18 @@
             gap: 10px;
         }
 
-        /* 4. 预览区域 (PE 样式) */
+        /* 4. 预览区域 */
         #preview-area {
             background: var(--card-color);
             border-radius: 12px;
             border: 1px solid var(--border-color);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align: center;
             overflow: hidden;
             position: relative;
-            min-height: 300px; /* 移动端给一个最小高度 */
-            padding: 15px; /* 内部留白 */
+            min-height: 300px;
+            padding: 15px;
         }
 
         #preview-container {
@@ -104,7 +121,7 @@
 
         #preview-image {
             max-width: 100%;
-            max-height: 70vh; /* 预览图在移动端最大高度为70%视口 */
+            max-height: 70vh;
             display: block;
             border-radius: 8px;
             user-select: none;
@@ -118,51 +135,54 @@
             padding: 20px;
         }
 
-        /* 水印预览层 (通用) */
+        /* 水印预览层 */
         #watermark-preview {
             position: absolute;
             top: 0;
             left: 0;
             pointer-events: none;
-            font-family: var(--font-main);
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            text-shadow: 0 0 3px rgba(0,0,0,0.4);
             user-select: none;
-            /* 关键：防止水印文本换行，否则计算不准 */
             white-space: nowrap; 
+            transition: transform 0.1s ease-out; /* 平滑旋转 */
+            /* 关键：让旋转和定位的基准点在左上角 */
+            transform-origin: top left;
+        }
+        @media (prefers-color-scheme: dark) {
+            #watermark-preview {
+                text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            }
         }
 
-        /*
-         * 5. PC 布局 (桌面)
-         * 使用 媒体查询 (Media Query)
-         * 当屏幕宽度 大于 900px 时，应用以下样式
-        */
+        /* 5. PC 布局 (桌面) */
         @media (min-width: 901px) {
             html, body {
-                overflow: hidden; /* PC端禁止页面滚动 */
+                overflow: hidden;
                 height: 100%;
             }
-
             #app-container {
-                grid-template-columns: 360px 1fr; /* PC端：左侧固定，右侧自适应 */
-                grid-template-rows: 1fr; /* PC端：单行 */
+                grid-template-columns: 380px 1fr; /* 增加控制面板宽度 */
+                grid-template-rows: 1fr;
                 height: 100vh;
                 padding: 20px;
                 gap: 20px;
             }
-
             #controls-panel {
-                overflow-y: auto; /* PC端：控制面板内容多时内部滚动 */
+                overflow-y: auto;
                 padding: 24px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             }
-            
+            @media (prefers-color-scheme: dark) {
+                #controls-panel {
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                }
+            }
             #preview-area {
-                min-height: auto; /* PC端重置最小高度 */
+                min-height: auto;
                 padding: 20px;
             }
-            
             #preview-image {
-                max-height: calc(100vh - 80px); /* PC端预览图高度限制 */
+                max-height: calc(100vh - 80px);
             }
         }
 
@@ -174,19 +194,38 @@
         }
 
         input[type="text"],
-        input[type="number"] {
+        input[type="number"],
+        select {
             width: 100%;
             padding: 12px;
-            background: var(--bg-color);
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-color);
             font-size: 1rem;
             transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        /* 为 select 添加箭头 */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.7rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        @media (prefers-color-scheme: dark) {
+            select {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            }
         }
 
+
         input[type="text"]:focus,
-        input[type="number"]:focus {
+        input[type="number"]:focus,
+        select:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
@@ -196,7 +235,7 @@
             -webkit-appearance: none;
             width: 100%;
             height: 8px;
-            background: var(--bg-color);
+            background: var(--border-color);
             border-radius: 5px;
             outline: none;
             cursor: pointer;
@@ -249,7 +288,12 @@
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            .btn:hover {
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
         }
         .btn:active { transform: translateY(0); }
 
@@ -258,14 +302,18 @@
         .btn-success { background: var(--success-color); color: white; }
         .btn-success:hover { background: #2dab4a; }
         .btn-secondary { background: var(--border-color); color: var(--text-color); }
-        .btn-secondary:hover { background: #55556c; }
+        .btn-secondary:hover { background: #cccccc; }
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary { background: #55556c; color: var(--text-color); }
+            .btn-secondary:hover { background: #66667d; }
+        }
 
         input[type="file"] { display: none; }
 
         /* 8. 进度条 (通用) */
         .progress-bar-container {
             width: 100%;
-            background: var(--bg-color);
+            background: var(--border-color);
             border-radius: 8px;
             height: 20px;
             overflow: hidden;
@@ -305,14 +353,32 @@
                 <label for="watermark-text">2. 水印内容</label>
                 <input type="text" id="watermark-text">
             </div>
-
+            
             <div class="control-group">
-                <label for="font-size">3. 字体大小 ( <span id="font-size-value">30</span> px )</label>
-                <input type="range" id="font-size" min="10" max="200" value="30">
+                <label for="font-family">3. 字体</label>
+                <select id="font-family">
+                    <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'>默认 (无衬线)</option>
+                    <option value='"Times New Roman", Times, serif'>衬线体 (Serif)</option>
+                    <option value='"Courier New", Courier, monospace'>等宽体 (Monospace)</option>
+                    <option value='Cursive, "Comic Sans MS"'>手写体 (Cursive)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="font-weight">4. 粗细</label>
+                <select id="font-weight">
+                    <option value="normal">常规</option>
+                    <option value="bold">加粗</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="font-size">5. 字体大小 ( <span id="font-size-value">30</span> px )</label>
+                <input type="range" id="font-size" min="10" max="300" value="30">
             </div>
 
             <div class="control-group">
-                <label for="font-color">4. 字体颜色</label>
+                <label for="font-color">6. 字体颜色</label>
                 <div class="color-picker-wrapper">
                     <input type="color" id="font-color" value="#FFFFFF">
                     <input type="text" id="font-color-hex" value="#FFFFFF">
@@ -320,17 +386,22 @@
             </div>
 
             <div class="control-group">
-                <label for="opacity">5. 透明度 ( <span id="opacity-value">0.7</span> )</label>
+                <label for="opacity">7. 透明度 ( <span id="opacity-value">0.7</span> )</label>
                 <input type="range" id="opacity" min="0" max="1" step="0.01" value="0.7">
             </div>
             
             <div class="control-group">
-                <label for="pos-x">6. 水平位置 (X) ( <span id="pos-x-value">10</span> px )</label>
+                <label for="rotation">8. 旋转 ( <span id="rotation-value">0</span> ° )</label>
+                <input type="range" id="rotation" min="-90" max="90" step="1" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="pos-x">9. 水平位置 (X) ( <span id="pos-x-value">10</span> px )</label>
                 <input type="range" id="pos-x" min="0" max="1000" value="10">
             </div>
             
             <div class="control-group">
-                <label for="pos-y">7. 垂直位置 (Y) ( <span id="pos-y-value">10</span> px )</label>
+                <label for="pos-y">10. 垂直位置 (Y) ( <span id="pos-y-value">10</span> px )</label>
                 <input type="range" id="pos-y" min="0" max="1000" value="10">
             </div>
             
@@ -358,35 +429,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- 1. 获取所有DOM元素 ---
-            // (与之前相同，保持不变)
+            // --- 1. 获取所有DOM元素 (包括新增的) ---
             const uploadBtn = document.getElementById('upload-btn');
             const previewImage = document.getElementById('preview-image');
-            const previewContainer = document.getElementById('preview-container');
             const watermarkPreview = document.getElementById('watermark-preview');
             const placeholderText = document.getElementById('placeholder-text');
+            
             const textInput = document.getElementById('watermark-text');
+            const fontFamilyInput = document.getElementById('font-family');
+            const fontWeightInput = document.getElementById('font-weight');
             const fontSizeInput = document.getElementById('font-size');
             const fontSizeValue = document.getElementById('font-size-value');
             const fontColorInput = document.getElementById('font-color');
             const fontColorHex = document.getElementById('font-color-hex');
             const opacityInput = document.getElementById('opacity');
             const opacityValue = document.getElementById('opacity-value');
+            const rotationInput = document.getElementById('rotation');
+            const rotationValue = document.getElementById('rotation-value');
             const posXInput = document.getElementById('pos-x');
             const posXValue = document.getElementById('pos-x-value');
             const posYInput = document.getElementById('pos-y');
             const posYValue = document.getElementById('pos-y-value');
+            
             const resetBtn = document.getElementById('reset-btn');
             const downloadBtn = document.getElementById('download-btn');
+            
             const uploadProgressContainer = document.getElementById('upload-progress-container');
             const uploadProgressBar = document.getElementById('upload-progress');
             const downloadProgressContainer = document.getElementById('download-progress-container');
             const downloadProgressBar = document.getElementById('download-progress');
 
-            let originalImage = null;
+            let originalImage = null; // 存储原始图片对象
+            let currentFile = null;   // 存储当前文件
 
             // --- 2. 辅助函数 ---
-            // (与之前相同，保持不变)
             function getFormattedDateTime() {
                 const now = new Date();
                 const year = now.getFullYear();
@@ -394,6 +470,7 @@
                 const day = now.getDate().toString().padStart(2, '0');
                 const hours = now.getHours().toString().padStart(2, '0');
                 const minutes = now.getMinutes().toString().padStart(2, '0');
+                // 2025年11月14日 10:11 (完全匹配您的格式)
                 return `${year}年${month}月${day}日 ${hours}:${minutes}`;
             }
 
@@ -413,40 +490,56 @@
                 }, 1500);
             }
             
-            // --- 3. 核心功能：设置与更新 ---
+            // --- 3. 核心功能：智能默认与更新 ---
 
-            function setDefaultValues() {
+            /**
+             * 智能默认：根据图片尺寸设置默认水印
+             * 新逻辑：默认位置为 "底部居中"
+             */
+            function applySmartDefaults() {
+                // 通用默认值
                 textInput.value = getFormattedDateTime();
-                fontSizeInput.value = 30;
-                fontSizeValue.innerText = 30;
                 fontColorInput.value = '#FFFFFF';
                 fontColorHex.value = '#FFFFFF';
                 opacityInput.value = 0.7;
-                opacityValue.innerText = 0.7;
-                
+                fontFamilyInput.value = fontFamilyInput.options[0].value; // 默认字体
+                fontWeightInput.value = 'normal';
+                rotationInput.value = 0;
+
                 if (originalImage) {
-                    // 如果已有图片，更新滑块最大值并设置默认右下角
-                    posXInput.max = originalImage.width;
-                    posYInput.max = originalImage.height;
+                    const imgWidth = originalImage.width;
+                    const imgHeight = originalImage.height;
+
+                    // --- 智能字体大小 ---
+                    // 适配不同类型图片：基于图片宽度计算
+                    let smartFontSize = Math.round(imgWidth / 35);
+                    smartFontSize = Math.max(16, Math.min(smartFontSize, 60)); // 限制范围
+                    fontSizeInput.value = smartFontSize;
+
+                    // --- 智能位置 (底部居中) ---
+                    const paddingY = imgHeight * 0.02; // 底部 2% 边距
                     
-                    // 估算一个基于原始图片尺寸的右下角位置
-                    // 动态估算文本宽度 (基于字体大小)
-                    const estimatedTextWidth = textInput.value.length * (fontSizeInput.value * 0.6);
-                    const defaultX = Math.max(10, originalImage.width - estimatedTextWidth - 20); // 留20px边距
-                    const defaultY = Math.max(10, originalImage.height - fontSizeInput.value - 20); // 留20px边距
+                    // 估算文本宽度 (这是一个近似值，用于设置默认X)
+                    const estimatedTextWidth = textInput.value.length * (smartFontSize * 0.55);
                     
-                    posXInput.value = defaultX;
-                    posXValue.innerText = defaultX;
-                    posYInput.value = defaultY;
-                    posYValue.innerText = defaultY;
+                    let smartPosX = (imgWidth / 2) - (estimatedTextWidth / 2);
+                    let smartPosY = imgHeight - smartFontSize - paddingY; // Y 坐标代表 "顶部"
+
+                    // 确保不超出边界
+                    smartPosX = Math.max(0, smartPosX);
+                    smartPosY = Math.max(0, smartPosY);
+                    
+                    posXInput.value = smartPosX;
+                    posYInput.value = smartPosY;
+                    
                 } else {
-                    // 默认值（图片加载前）
+                    // 无图时的默认值
+                    fontSizeInput.value = 30;
                     posXInput.value = 10;
-                    posXValue.innerText = 10;
                     posYInput.value = 10;
-                    posYValue.innerText = 10;
                 }
                 
+                updateControlValues();
                 updatePreview();
             }
 
@@ -454,39 +547,55 @@
              * 更新预览区域的水印
              */
             function updatePreview() {
-                if (!originalImage || !previewImage.src) return;
+                if (!originalImage || !previewImage.src) {
+                    watermarkPreview.innerText = ''; // 没有图片则清除水印
+                    return;
+                }
 
                 const text = textInput.value;
                 const size = fontSizeInput.value;
                 const color = fontColorInput.value;
                 const opacity = opacityInput.value;
+                const family = fontFamilyInput.value;
+                const weight = fontWeightInput.value;
+                const rotation = rotationInput.value;
                 
-                // 关键：计算预览图和原始图的缩放比例
-                // 这保证了无论预览图多大，水印位置都是按比例缩放的
+                // 计算预览缩放比例
                 const scaleX = previewImage.width / originalImage.width;
                 const scaleY = previewImage.height / originalImage.height;
-                
-                // 我们使用一个统一的缩放比例 (取较小者)，保持水印字体不变形
                 const scale = Math.min(scaleX, scaleY);
 
-                // 将原始坐标系的位置 缩放到 预览坐标系
+                // 缩放坐标
                 const x = posXInput.value * scale;
                 const y = posYInput.value * scale;
 
-                watermarkPreview.style.font = `${size * scale}px ${var(--font-main)}`; // 字体大小也需要缩放
+                watermarkPreview.style.font = `${weight} ${size * scale}px ${family}`;
                 watermarkPreview.style.color = color;
                 watermarkPreview.style.opacity = opacity;
                 watermarkPreview.style.left = `${x}px`;
                 watermarkPreview.style.top = `${y}px`;
+                watermarkPreview.style.transform = `rotate(${rotation}deg)`; // 应用旋转
                 watermarkPreview.innerText = text;
+            }
+
+            /**
+             * 更新所有滑块/颜色选择器旁的数值显示
+             */
+            function updateControlValues() {
+                fontSizeValue.innerText = fontSizeInput.value;
+                opacityValue.innerText = opacityInput.value;
+                rotationValue.innerText = rotationInput.value;
+                posXValue.innerText = Math.round(posXInput.value);
+                posYValue.innerText = Math.round(posYInput.value);
+                fontColorHex.value = fontColorInput.value;
             }
 
             // --- 4. 事件监听器 ---
 
             // A. 文件上传
             uploadBtn.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
+                currentFile = e.target.files[0];
+                if (currentFile) {
                     showSimulatedProgress(uploadProgressContainer, uploadProgressBar, () => {
                         const reader = new FileReader();
                         reader.onload = (event) => {
@@ -496,45 +605,50 @@
                                 previewImage.style.display = 'block';
                                 placeholderText.style.display = 'none';
 
-                                // 关键：更新滑块的最大值
+                                // 更新滑块最大值以匹配原始图片尺寸
                                 posXInput.max = originalImage.width;
-                                posYInput.max = originalImage.height;
+                                // 允许Y轴滑出图片（例如旋转时）
+                                posYInput.max = originalImage.height * 1.2; 
                                 
-                                // 设置默认值（特别是位置）
-                                setDefaultValues();
+                                // 应用 "底部居中" 智能默认值
+                                applySmartDefaults();
                                 
-                                // 确保预览图加载完成后再更新一次
-                                // 使用 setTimeout 确保 DOM 渲染完成
                                 setTimeout(updatePreview, 100); 
+                            };
+                            originalImage.onerror = () => {
+                                alert('图片加载失败，请检查文件是否为有效图片。');
+                                previewImage.src = '';
+                                previewImage.style.display = 'none';
+                                placeholderText.style.display = 'block';
+                                originalImage = null;
+                                currentFile = null;
+                                watermarkPreview.innerText = '';
                             };
                             originalImage.src = event.target.result;
                         };
-                        reader.readAsDataURL(file);
+                        reader.onerror = () => { alert('文件读取失败，请重试。'); currentFile = null; };
+                        reader.readAsDataURL(currentFile);
                     });
                 }
             });
 
             // B. 所有自定义控件
-            const controls = [textInput, fontSizeInput, fontColorInput, opacityInput, posXInput, posYInput];
+            const controls = [
+                textInput, fontSizeInput, fontColorInput, opacityInput, 
+                fontFamilyInput, fontWeightInput, rotationInput, 
+                posXInput, posYInput
+            ];
             controls.forEach(control => {
-                control.addEventListener('input', updatePreview);
+                control.addEventListener('input', () => {
+                    updateControlValues();
+                    updatePreview();
+                });
             });
             
-            // C. 同步更新文本值
-            fontSizeInput.addEventListener('input', () => { fontSizeValue.innerText = fontSizeInput.value; });
-            opacityInput.addEventListener('input', () => { opacityValue.innerText = opacityInput.value; });
-            posXInput.addEventListener('input', () => { posXValue.innerText = posXInput.value; });
-            posYInput.addEventListener('input', () => { posYValue.innerText = posYInput.value; });
-            fontColorInput.addEventListener('input', () => { fontColorHex.value = fontColorInput.value; });
-            fontColorHex.addEventListener('change', () => {
-                fontColorInput.value = fontColorHex.value;
-                updatePreview();
-            });
+            // C. 恢复默认
+            resetBtn.addEventListener('click', applySmartDefaults);
 
-            // D. 恢复默认
-            resetBtn.addEventListener('click', setDefaultValues);
-
-            // E. 下载 (与之前相同，保持不变)
+            // D. 下载 (关键：添加旋转逻辑)
             downloadBtn.addEventListener('click', () => {
                 if (!originalImage) {
                     alert('请先上传一张图片！');
@@ -543,40 +657,58 @@
                 
                 showSimulatedProgress(downloadProgressContainer, downloadProgressBar, () => {
                     const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
+                    const ctx = canvas.getContext('20d');
                     canvas.width = originalImage.width;
                     canvas.height = originalImage.height;
                     
+                    // 1. 绘制原始图片
                     ctx.drawImage(originalImage, 0, 0);
                     
-                    // 绘制水印
-                    ctx.font = `${fontSizeInput.value}px ${var(--font-main)}`;
+                    // 2. 保存当前画布状态
+                    ctx.save();
+                    
+                    // 3. 设置水印样式
+                    const x = parseFloat(posXInput.value);
+                    const y = parseFloat(posYInput.value);
+                    const angleInRadians = parseFloat(rotationInput.value) * Math.PI / 180;
+                    
+                    ctx.font = `${fontWeightInput.value} ${fontSizeInput.value}px ${fontFamilyInput.value}`;
                     ctx.fillStyle = fontColorInput.value;
                     ctx.globalAlpha = opacityInput.value;
                     
-                    // 计算 Y 坐标 (fillText的y是基线)
-                    // 我们让 Y 坐标更精确，代表文本的“顶部”
-                    const yBaseline = parseInt(posYInput.value, 10) + parseInt(fontSizeInput.value, 10) * 0.9; // 估算基线
-                    ctx.fillText(textInput.value, posXInput.value, yBaseline);
+                    // 4. 计算 Y 轴基线 (让 Y 坐标代表文本顶部)
+                    const metrics = ctx.measureText(textInput.value);
+                    const yBaseline = y + metrics.actualBoundingBoxAscent;
 
+                    // 5. 移动并旋转画布
+                    // 移动画布原点到 (x, yBaseline)
+                    ctx.translate(x, yBaseline);
+                    // 绕新原点旋转
+                    ctx.rotate(angleInRadians);
+                    
+                    // 6. 在新原点 (0, 0) 绘制文本
+                    ctx.fillText(textInput.value, 0, 0);
+                    
+                    // 7. 恢复画布到 save() 之前的状态
+                    ctx.restore();
+
+                    // 8. 生成并下载
                     const dataUrl = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.href = dataUrl;
-                    link.download = 'watermarked-image.png';
+                    link.download = `watermarked_${new Date().getTime()}.png`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                 });
             });
             
-            // --- 5. 新增：响应式支持 ---
-            // 当窗口大小改变时 (例如PC浏览器缩放, 或手机横竖屏切换)
-            // 重新计算预览水印的位置
+            // --- 5. 响应式与加载支持 ---
             window.addEventListener('resize', updatePreview);
+            previewImage.addEventListener('load', updatePreview);
 
             // --- 6. 初始化 ---
-            setDefaultValues();
-
+            applySmartDefaults(); // 页面加载时即应用默认值（无图状态）
         });
     </script>
 
