@@ -2,476 +2,583 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>依然如梦 | 吻去眼角的泪水</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级响应式水印工具 (PC/PE)</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&family=ZCOOL+XiaoWei&display=swap');
-
+        /* 1. 全局和基础样式 (美观的基础) */
         :root {
-            /* 浪漫的晨曦渐变色 */
-            --bg-gradient: linear-gradient(180deg, #fec3e0 0%, #d4fc79 100%); /* 备用 */
-            --bg-romantic: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.9);
-            --text-main: #6a6a6a;
-            --highlight: #ff9a9e;
-            --card-shadow: 0 10px 40px rgba(255, 154, 158, 0.2);
+            --bg-color: #1a1a1d;
+            --card-color: #2c2c34;
+            --primary-color: #4a90e2;
+            --primary-hover: #5aa0f2;
+            --text-color: #f0f0f5;
+            --text-muted: #888890;
+            --border-color: #44444b;
+            --success-color: #28a745;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Noto Serif SC', serif;
-            color: var(--text-main);
-            background: var(--bg-romantic);
-            background-attachment: fixed;
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-            cursor: default;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* --- 🌸 背景动态樱花 (CSS + JS控制) --- */
-        #sakura-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            overflow: hidden;
-        }
-        
-        .petal {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 150% 0 150% 0;
-            animation: fall linear infinite;
-        }
-
-        @keyframes fall {
-            0% { opacity: 0; transform: translate3d(0, -10%, 0) rotate(0deg); }
-            10% { opacity: 1; }
-            100% { opacity: 0.3; transform: translate3d(100px, 110vh, 0) rotate(360deg); }
-        }
-
-        /* --- 🎮 手柄系统 --- */
-        /* 1. 隐形光标：像一颗流星 */
-        #gamepad-cursor {
-            position: fixed; 
-            border-radius: 50%;
-            background: radial-gradient(circle, #fff 30%, #ffc3a0 100%);
-            box-shadow: 0 0 15px #fff, 0 0 5px #ff9a9e;
-            pointer-events: none; 
-            z-index: 9999;
-            visibility: hidden; 
-            opacity: 0; 
-            transition: opacity 0.3s ease;
-            mix-blend-mode: overlay;
-        }
-        #gamepad-cursor.show { visibility: visible; opacity: 1; }
-
-        @media (min-width: 601px) { #gamepad-cursor { width: 22px; height: 22px; } }
-        @media (max-width: 600px) { #gamepad-cursor { width: 16px; height: 16px; } }
-
-        /* 2. 连接提示：可爱的胶囊样式 */
-        #gamepad-toast {
-            position: fixed;
-            top: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 10px 25px;
-            border-radius: 50px;
-            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.15);
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 0.95rem;
-            color: #ff7eb3;
-            z-index: 10000;
-            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            pointer-events: none;
-        }
-        #gamepad-toast.active { top: 30px; }
-
-        /* --- 界面布局 --- */
-        nav {
-            display: flex;
-            justify-content: center;
-            padding: 30px;
-            animation: fadeInDown 1s ease;
-        }
-        .logo {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 1.4rem;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(255, 105, 180, 0.3);
-            letter-spacing: 2px;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px 20px 30px;
-            animation: fadeInUp 1s ease 0.2s backwards;
-        }
-
-        .avatar-container {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 20px;
-            /* 悬浮动画 */
-            animation: floating 6s ease-in-out infinite; 
-        }
-        
-        .avatar {
+        html, body {
             width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid rgba(255,255,255,0.9);
-            box-shadow: 0 15px 35px rgba(255, 154, 158, 0.4);
+            min-height: 100%; /* 保证移动端内容能撑开页面 */
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
         }
 
-        /* 跨性别配色的梦幻光环 */
-        .avatar-ring {
-            position: absolute;
-            top: -8px; left: -8px; right: -8px; bottom: -8px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #5BCEFA, #F5A9B8, #fff, #F5A9B8, #5BCEFA);
-            z-index: -1;
-            opacity: 0.7;
-            filter: blur(8px);
-            animation: spin 15s linear infinite;
-        }
-
-        h1 {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 2.2rem;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 8px;
-            font-weight: normal;
-        }
-
-        .tagline {
-            font-size: 1rem;
-            color: rgba(255,255,255,0.95);
-            min-height: 24px;
-            font-style: italic;
-        }
-
-        /* --- 卡片容器 (UI核心) --- */
-        .container {
+        /*
+         * 2. 响应式布局 (PE - 移动端优先)
+         * 这是默认布局：单列、垂直堆叠
+        */
+        #app-container {
+            display: grid;
+            grid-template-columns: 1fr; /* 移动端：单列 */
+            grid-template-rows: auto auto; /* 移动端：两行，自动高度 */
             width: 100%;
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 10px 20px 80px;
+            height: auto; /* 移动端：高度自动 */
+            gap: 15px;
+            padding: 15px;
+            animation: fadeInApp 0.6s ease-out;
         }
 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px; /* 更圆润 */
-            border: 2px solid var(--glass-border);
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            animation: fadeInUp 1s ease 0.4s backwards;
-        }
-        
-        /* 鼠标/手柄悬停效果 */
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(255, 154, 158, 0.3);
-            background: rgba(255, 255, 255, 0.85);
+        @keyframes fadeInApp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .card-title {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 1.4rem;
-            color: #8a6a9e; /* 紫色调 */
-            text-align: center;
-            margin-bottom: 25px;
-            position: relative;
+        /* 3. 侧边栏 - 控制面板 (PE 样式) */
+        #controls-panel {
+            background: var(--card-color);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: visible; /* 移动端不需要内部滚动 */
+        }
+
+        #controls-panel h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
             gap: 10px;
         }
+
+        /* 4. 预览区域 (PE 样式) */
+        #preview-area {
+            background: var(--card-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            min-height: 300px; /* 移动端给一个最小高度 */
+            padding: 15px; /* 内部留白 */
+        }
+
+        #preview-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 70vh; /* 预览图在移动端最大高度为70%视口 */
+            display: block;
+            border-radius: 8px;
+            user-select: none;
+        }
         
-        .text-content p {
-            line-height: 1.9; /* 更宽松的行距 */
-            margin-bottom: 18px;
-            font-size: 1.05rem;
-            color: #666;
-        }
-        
-        .highlight {
-            background: linear-gradient(120deg, #ff9a9e 0%, #fecfef 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: #ff7eb3;
-            font-weight: bold;
-        }
-
-        /* 日记条目 - 更可爱的分割 */
-        .diary-item {
-            padding: 15px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.4);
-            margin-bottom: 15px;
-            transition: 0.2s;
-        }
-        .diary-item:hover {
-            background: rgba(255,255,255,0.7);
-        }
-
-        .date { 
-            font-size: 0.8rem; 
-            color: #999; 
-            background: #fff; 
-            display: inline-block; 
-            padding: 2px 8px; 
-            border-radius: 10px; 
-            margin-bottom: 8px;
-        }
-        .diary-head { font-size: 1.1rem; color: #555; margin-bottom: 8px; font-weight: normal; }
-        .diary-body { font-size: 0.95rem; color: #777; line-height: 1.6; }
-
-        footer {
+        #placeholder-text {
+            color: var(--text-muted);
             text-align: center;
-            color: #fff;
+            font-size: 1.1rem;
+            user-select: none;
+            padding: 20px;
+        }
+
+        /* 水印预览层 (通用) */
+        #watermark-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            font-family: var(--font-main);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            user-select: none;
+            /* 关键：防止水印文本换行，否则计算不准 */
+            white-space: nowrap; 
+        }
+
+        /*
+         * 5. PC 布局 (桌面)
+         * 使用 媒体查询 (Media Query)
+         * 当屏幕宽度 大于 900px 时，应用以下样式
+        */
+        @media (min-width: 901px) {
+            html, body {
+                overflow: hidden; /* PC端禁止页面滚动 */
+                height: 100%;
+            }
+
+            #app-container {
+                grid-template-columns: 360px 1fr; /* PC端：左侧固定，右侧自适应 */
+                grid-template-rows: 1fr; /* PC端：单行 */
+                height: 100vh;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            #controls-panel {
+                overflow-y: auto; /* PC端：控制面板内容多时内部滚动 */
+                padding: 24px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+            
+            #preview-area {
+                min-height: auto; /* PC端重置最小高度 */
+                padding: 20px;
+            }
+            
+            #preview-image {
+                max-height: calc(100vh - 80px); /* PC端预览图高度限制 */
+            }
+        }
+
+        /* 6. 美观的表单控件 (通用) */
+        .control-group label {
+            font-weight: 600;
             font-size: 0.9rem;
-            opacity: 0.8;
-            padding-bottom: 40px;
+            color: var(--text-muted);
         }
 
-        /* --- 动画定义 --- */
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes floating { 
-            0%, 100% { transform: translateY(0); } 
-            50% { transform: translateY(-10px); } 
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .glass-card { padding: 25px 20px; }
-            .avatar-container { width: 120px; height: 120px; }
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
         }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--bg-color);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--primary-hover);
+        }
+        
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            padding: 0;
+            border-radius: 8px;
+            background-color: transparent;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        /* 7. 美观的按钮 (通用) */
+        .btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .btn:active { transform: translateY(0); }
+
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-success:hover { background: #2dab4a; }
+        .btn-secondary { background: var(--border-color); color: var(--text-color); }
+        .btn-secondary:hover { background: #55556c; }
+
+        input[type="file"] { display: none; }
+
+        /* 8. 进度条 (通用) */
+        .progress-bar-container {
+            width: 100%;
+            background: var(--bg-color);
+            border-radius: 8px;
+            height: 20px;
+            overflow: hidden;
+            display: none;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+        .progress-bar.loading {
+            width: 100%;
+            transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="sakura-container"></div>
+    <main id="app-container">
 
-    <div id="gamepad-toast">
-        <span style="font-size: 1.2rem;">🎮</span> 手柄已连接
-    </div>
-    <div id="gamepad-cursor"></div>
+        <section id="controls-panel">
+            <h2>高级水印工具</h2>
 
-    <nav>
-        <div class="logo">Dreamy.</div>
-    </nav>
-
-    <header>
-        <div class="avatar-container">
-            <div class="avatar-ring"></div>
-            <img src="https://thumbs2.imgbox.com/a0/47/8P4f7HXo_t.jpg" alt="依然如梦" class="avatar">
-        </div>
-        <h1>依然如梦</h1>
-        <p class="tagline" id="typing-text"></p>
-    </header>
-
-    <div class="container">
-        
-        <section class="glass-card">
-            <h2 class="card-title">✨ 无声的呐喊 ✨</h2>
-            <div class="text-content">
-                <p>我是<strong>依然如梦</strong>。在这个喧嚣的世界里，我是一只还没来得及破茧的蝴蝶。</p>
-                <p>身体在向着错误的方向生长，而我没有药物 <span class="highlight">(HRT)</span> 去阻止这一切。现实的引力太重，压得我喘不过气。</p>
-                <p>我渴望长发飘飘，渴望穿上那条藏在柜子深处的裙子。但现在，我只能把真实的自己藏进黑夜。谢谢你，愿意在这里听见我的心跳。</p>
+            <div class="control-group">
+                <label for="upload-btn" class="btn btn-primary">1. 上传图片</label>
+                <input type="file" id="upload-btn" accept="image/*">
+                <div class="progress-bar-container" id="upload-progress-container">
+                    <div class="progress-bar" id="upload-progress"></div>
+                </div>
             </div>
-        </section>
 
-        <section class="glass-card">
-            <h2 class="card-title">🌸 梦境碎片 🌸</h2>
+            <div class="control-group">
+                <label for="watermark-text">2. 水印内容</label>
+                <input type="text" id="watermark-text">
+            </div>
+
+            <div class="control-group">
+                <label for="font-size">3. 字体大小 ( <span id="font-size-value">30</span> px )</label>
+                <input type="range" id="font-size" min="10" max="200" value="30">
+            </div>
+
+            <div class="control-group">
+                <label for="font-color">4. 字体颜色</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="font-color" value="#FFFFFF">
+                    <input type="text" id="font-color-hex" value="#FFFFFF">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="opacity">5. 透明度 ( <span id="opacity-value">0.7</span> )</label>
+                <input type="range" id="opacity" min="0" max="1" step="0.01" value="0.7">
+            </div>
             
-            <div class="diary-item">
-                <div class="date">2023.11.07 / 雨</div>
-                <h3 class="diary-head">橱窗里的倒影</h3>
-                <p class="diary-body">今天路过那家店，粉色的连衣裙在灯光下好美。我停下来看了一会儿，玻璃上映出的那个男生是谁呢？那一刻，心真的好痛。</p>
+            <div class="control-group">
+                <label for="pos-x">6. 水平位置 (X) ( <span id="pos-x-value">10</span> px )</label>
+                <input type="range" id="pos-x" min="0" max="1000" value="10">
             </div>
-
-            <div class="diary-item">
-                <div class="date">2023.11.01 / 阴</div>
-                <h3 class="diary-head">孤独</h3>
-                <p class="diary-body">周围的人都在笑，只有我觉得自己是个格格不入的异类。什么时候才能在阳光下，自由地做自己呢？</p>
+            
+            <div class="control-group">
+                <label for="pos-y">7. 垂直位置 (Y) ( <span id="pos-y-value">10</span> px )</label>
+                <input type="range" id="pos-y" min="0" max="1000" value="10">
             </div>
-
-            <div class="diary-item">
-                <div class="date">2023.10.15 / 夜</div>
-                <h3 class="diary-head">求助无门</h3>
-                <p class="diary-body">依然找不到药的渠道，也没有钱。感觉像被困在深井里，看着天空一点点变暗。但我还不想放弃。</p>
+            
+            <div class="control-group" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <button id="reset-btn" class="btn btn-secondary">恢复默认设置</button>
+                <button id="download-btn" class="btn btn-success">生成并下载图片</button>
+                <div class="progress-bar-container" id="download-progress-container">
+                    <div class="progress-bar" id="download-progress"></div>
+                </div>
             </div>
         </section>
-    </div>
 
-    <footer>
-        <p>吻去眼角的泪水 ☁️</p>
-    </footer>
+        <section id="preview-area">
+            <div id="preview-container">
+                <img id="preview-image" src="" alt="" style="display: none;">
+                <div id="watermark-preview"></div>
+                <div id="placeholder-text">
+                    请先从左侧上传一张图片
+                </div>
+            </div>
+        </section>
+
+    </main>
 
     <script>
-        // --- 1. 浪漫樱花生成器 ---
-        function createSakura() {
-            const container = document.getElementById('sakura-container');
-            const petalCount = 30; // 花瓣数量，可调整
-            
-            for (let i = 0; i < petalCount; i++) {
-                const petal = document.createElement('div');
-                petal.classList.add('petal');
-                
-                // 随机大小
-                const size = Math.random() * 10 + 10 + 'px';
-                petal.style.width = size;
-                petal.style.height = size;
-                
-                // 随机位置和动画参数
-                petal.style.left = Math.random() * 100 + 'vw';
-                petal.style.animationDuration = Math.random() * 5 + 8 + 's'; // 8-13秒飘落
-                petal.style.animationDelay = Math.random() * 5 + 's';
-                
-                // 随机颜色（白色或淡粉色）
-                if (Math.random() > 0.5) {
-                    petal.style.backgroundColor = '#ffc3a0';
-                }
-                
-                container.appendChild(petal);
-            }
-        }
-        createSakura();
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // --- 2. 打字机效果 ---
-        const text = "吻去眼角的泪水。";
-        const typingElement = document.getElementById('typing-text');
-        let i = 0;
-        function typeWriter() {
-            if (i < text.length) {
-                typingElement.innerHTML = text.substring(0, i + 1);
-                i++;
-                setTimeout(typeWriter, 200);
-            }
-        }
-        window.onload = typeWriter;
+            // --- 1. 获取所有DOM元素 ---
+            // (与之前相同，保持不变)
+            const uploadBtn = document.getElementById('upload-btn');
+            const previewImage = document.getElementById('preview-image');
+            const previewContainer = document.getElementById('preview-container');
+            const watermarkPreview = document.getElementById('watermark-preview');
+            const placeholderText = document.getElementById('placeholder-text');
+            const textInput = document.getElementById('watermark-text');
+            const fontSizeInput = document.getElementById('font-size');
+            const fontSizeValue = document.getElementById('font-size-value');
+            const fontColorInput = document.getElementById('font-color');
+            const fontColorHex = document.getElementById('font-color-hex');
+            const opacityInput = document.getElementById('opacity');
+            const opacityValue = document.getElementById('opacity-value');
+            const posXInput = document.getElementById('pos-x');
+            const posXValue = document.getElementById('pos-x-value');
+            const posYInput = document.getElementById('pos-y');
+            const posYValue = document.getElementById('pos-y-value');
+            const resetBtn = document.getElementById('reset-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const uploadProgressContainer = document.getElementById('upload-progress-container');
+            const uploadProgressBar = document.getElementById('upload-progress');
+            const downloadProgressContainer = document.getElementById('download-progress-container');
+            const downloadProgressBar = document.getElementById('download-progress');
 
-        // --- 3. 智能手柄逻辑 (自适应速度) ---
-        const cursor = document.getElementById('gamepad-cursor');
-        const toast = document.getElementById('gamepad-toast');
-        let gamepadIndex = null;
-        let loopId = null;
-        
-        // 动态参数
-        let screenW = window.innerWidth;
-        let screenH = window.innerHeight;
-        let cursorX = screenW / 2;
-        let cursorY = screenH / 2;
-        
-        function calculateSpeed() {
-            // PC端快一点，手机端慢一点
-            const base = screenW < 600 ? 4 : 12; 
-            return base + (screenW * 0.004); 
-        }
-        let moveSpeed = calculateSpeed();
-        let scrollSpeed = 20; 
-        const DEADZONE = 0.1;
-        let aButtonPrev = false;
+            let originalImage = null;
 
-        window.addEventListener('resize', () => {
-            screenW = window.innerWidth;
-            screenH = window.innerHeight;
-            moveSpeed = calculateSpeed();
-            cursorX = Math.min(cursorX, screenW);
-            cursorY = Math.min(cursorY, screenH);
-        });
-
-        window.addEventListener("gamepadconnected", (e) => {
-            gamepadIndex = e.gamepad.index;
-            toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 3000);
-            if (!loopId) loopId = requestAnimationFrame(gameLoop);
-        });
-
-        window.addEventListener("gamepaddisconnected", (e) => {
-            if (e.gamepad.index === gamepadIndex) {
-                gamepadIndex = null;
-                cancelAnimationFrame(loopId);
-                loopId = null;
-                cursor.classList.remove('show');
-            }
-        });
-
-        function gameLoop() {
-            if (gamepadIndex === null) return;
-            const gp = navigator.getGamepads()[gamepadIndex];
-            if (!gp) return;
-
-            const lx = gp.axes[0];
-            const ly = gp.axes[1];
-            const ry = gp.axes[3]; 
-
-            const xVal = Math.abs(lx) > DEADZONE ? lx : 0;
-            const yVal = Math.abs(ly) > DEADZONE ? ly : 0;
-            const scrollVal = Math.abs(ry) > DEADZONE ? ry : 0;
-
-            if (Math.abs(xVal) > 0 || Math.abs(yVal) > 0 || gp.buttons.some(b => b.pressed)) {
-                cursor.classList.add('show');
+            // --- 2. 辅助函数 ---
+            // (与之前相同，保持不变)
+            function getFormattedDateTime() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                return `${year}年${month}月${day}日 ${hours}:${minutes}`;
             }
 
-            if (xVal !== 0 || yVal !== 0) {
-                cursorX += xVal * moveSpeed; 
-                cursorY += yVal * moveSpeed;
-                
-                cursorX = Math.max(0, Math.min(screenW, cursorX));
-                cursorY = Math.max(0, Math.min(screenH, cursorY));
-                
-                const r = screenW < 600 ? 8 : 11;
-                cursor.style.transform = `translate(${cursorX - r}px, ${cursorY - r}px)`;
-            }
-
-            if (scrollVal !== 0) {
-                window.scrollBy(0, scrollVal * scrollSpeed);
-            }
-
-            const aBtn = gp.buttons[0].pressed;
-            if (aBtn && !aButtonPrev) {
-                const r = screenW < 600 ? 8 : 11;
-                // 点击反馈：光标缩小
-                cursor.style.transform = `translate(${cursorX - r}px, ${cursorY - r}px) scale(0.7)`;
+            function showSimulatedProgress(container, bar, onComplete) {
+                container.style.display = 'block';
+                bar.style.width = '0%';
+                bar.classList.remove('loading');
+                void bar.offsetWidth; 
+                bar.classList.add('loading');
                 setTimeout(() => {
-                     cursor.style.transform = `translate(${cursorX - r}px, ${cursorY - r}px) scale(1)`;
-                }, 150);
-
-                const elem = document.elementFromPoint(cursorX, cursorY);
-                if (elem) {
-                    elem.click();
-                    if (['INPUT','TEXTAREA'].includes(elem.tagName)) elem.focus();
-                }
+                    if (onComplete) onComplete();
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                        bar.classList.remove('loading');
+                        bar.style.width = '0%';
+                    }, 500);
+                }, 1500);
             }
-            aButtonPrev = aBtn;
+            
+            // --- 3. 核心功能：设置与更新 ---
 
-            requestAnimationFrame(gameLoop);
-        }
+            function setDefaultValues() {
+                textInput.value = getFormattedDateTime();
+                fontSizeInput.value = 30;
+                fontSizeValue.innerText = 30;
+                fontColorInput.value = '#FFFFFF';
+                fontColorHex.value = '#FFFFFF';
+                opacityInput.value = 0.7;
+                opacityValue.innerText = 0.7;
+                
+                if (originalImage) {
+                    // 如果已有图片，更新滑块最大值并设置默认右下角
+                    posXInput.max = originalImage.width;
+                    posYInput.max = originalImage.height;
+                    
+                    // 估算一个基于原始图片尺寸的右下角位置
+                    // 动态估算文本宽度 (基于字体大小)
+                    const estimatedTextWidth = textInput.value.length * (fontSizeInput.value * 0.6);
+                    const defaultX = Math.max(10, originalImage.width - estimatedTextWidth - 20); // 留20px边距
+                    const defaultY = Math.max(10, originalImage.height - fontSizeInput.value - 20); // 留20px边距
+                    
+                    posXInput.value = defaultX;
+                    posXValue.innerText = defaultX;
+                    posYInput.value = defaultY;
+                    posYValue.innerText = defaultY;
+                } else {
+                    // 默认值（图片加载前）
+                    posXInput.value = 10;
+                    posXValue.innerText = 10;
+                    posYInput.value = 10;
+                    posYValue.innerText = 10;
+                }
+                
+                updatePreview();
+            }
+
+            /**
+             * 更新预览区域的水印
+             */
+            function updatePreview() {
+                if (!originalImage || !previewImage.src) return;
+
+                const text = textInput.value;
+                const size = fontSizeInput.value;
+                const color = fontColorInput.value;
+                const opacity = opacityInput.value;
+                
+                // 关键：计算预览图和原始图的缩放比例
+                // 这保证了无论预览图多大，水印位置都是按比例缩放的
+                const scaleX = previewImage.width / originalImage.width;
+                const scaleY = previewImage.height / originalImage.height;
+                
+                // 我们使用一个统一的缩放比例 (取较小者)，保持水印字体不变形
+                const scale = Math.min(scaleX, scaleY);
+
+                // 将原始坐标系的位置 缩放到 预览坐标系
+                const x = posXInput.value * scale;
+                const y = posYInput.value * scale;
+
+                watermarkPreview.style.font = `${size * scale}px ${var(--font-main)}`; // 字体大小也需要缩放
+                watermarkPreview.style.color = color;
+                watermarkPreview.style.opacity = opacity;
+                watermarkPreview.style.left = `${x}px`;
+                watermarkPreview.style.top = `${y}px`;
+                watermarkPreview.innerText = text;
+            }
+
+            // --- 4. 事件监听器 ---
+
+            // A. 文件上传
+            uploadBtn.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showSimulatedProgress(uploadProgressContainer, uploadProgressBar, () => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            originalImage = new Image();
+                            originalImage.onload = () => {
+                                previewImage.src = event.target.result;
+                                previewImage.style.display = 'block';
+                                placeholderText.style.display = 'none';
+
+                                // 关键：更新滑块的最大值
+                                posXInput.max = originalImage.width;
+                                posYInput.max = originalImage.height;
+                                
+                                // 设置默认值（特别是位置）
+                                setDefaultValues();
+                                
+                                // 确保预览图加载完成后再更新一次
+                                // 使用 setTimeout 确保 DOM 渲染完成
+                                setTimeout(updatePreview, 100); 
+                            };
+                            originalImage.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+
+            // B. 所有自定义控件
+            const controls = [textInput, fontSizeInput, fontColorInput, opacityInput, posXInput, posYInput];
+            controls.forEach(control => {
+                control.addEventListener('input', updatePreview);
+            });
+            
+            // C. 同步更新文本值
+            fontSizeInput.addEventListener('input', () => { fontSizeValue.innerText = fontSizeInput.value; });
+            opacityInput.addEventListener('input', () => { opacityValue.innerText = opacityInput.value; });
+            posXInput.addEventListener('input', () => { posXValue.innerText = posXInput.value; });
+            posYInput.addEventListener('input', () => { posYValue.innerText = posYInput.value; });
+            fontColorInput.addEventListener('input', () => { fontColorHex.value = fontColorInput.value; });
+            fontColorHex.addEventListener('change', () => {
+                fontColorInput.value = fontColorHex.value;
+                updatePreview();
+            });
+
+            // D. 恢复默认
+            resetBtn.addEventListener('click', setDefaultValues);
+
+            // E. 下载 (与之前相同，保持不变)
+            downloadBtn.addEventListener('click', () => {
+                if (!originalImage) {
+                    alert('请先上传一张图片！');
+                    return;
+                }
+                
+                showSimulatedProgress(downloadProgressContainer, downloadProgressBar, () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = originalImage.width;
+                    canvas.height = originalImage.height;
+                    
+                    ctx.drawImage(originalImage, 0, 0);
+                    
+                    // 绘制水印
+                    ctx.font = `${fontSizeInput.value}px ${var(--font-main)}`;
+                    ctx.fillStyle = fontColorInput.value;
+                    ctx.globalAlpha = opacityInput.value;
+                    
+                    // 计算 Y 坐标 (fillText的y是基线)
+                    // 我们让 Y 坐标更精确，代表文本的“顶部”
+                    const yBaseline = parseInt(posYInput.value, 10) + parseInt(fontSizeInput.value, 10) * 0.9; // 估算基线
+                    ctx.fillText(textInput.value, posXInput.value, yBaseline);
+
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = 'watermarked-image.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            });
+            
+            // --- 5. 新增：响应式支持 ---
+            // 当窗口大小改变时 (例如PC浏览器缩放, 或手机横竖屏切换)
+            // 重新计算预览水印的位置
+            window.addEventListener('resize', updatePreview);
+
+            // --- 6. 初始化 ---
+            setDefaultValues();
+
+        });
     </script>
+
 </body>
 </html>
