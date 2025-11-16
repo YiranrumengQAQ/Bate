@@ -310,6 +310,14 @@
 
             <div class="status" id="status"></div>
 
+            <div class="log-area" id="logArea">
+                <div class="log-header">
+                    <span>📋 运行日志</span>
+                    <button class="btn-clear-log" id="clearLogBtn">清空</button>
+                </div>
+                <div class="log-content" id="logContent"></div>
+            </div>
+
             <div class="controls">
                 <div class="input-group">
                     <label for="password">🔑 加密密码</label>
@@ -409,7 +417,7 @@
                 showStatus('检测到加密图片！可以解密', 'info');
             } else {
                 isEncrypted = false;
-                decryptBtn.disabled = true;
+                decryptBtn.disabled = false; // 允许对任何图片尝试解密
                 encryptBtn.disabled = false;
             }
         }
@@ -548,13 +556,26 @@
                     const data = imageData.data;
                     const key = hashPassword(password);
 
-                    // 第一步：移除噪点
+                    console.log('开始解密，密钥:', key);
+
+                    // 第一步：反向颜色置换和解密
                     for (let i = 0; i < data.length; i += 4) {
-                        const noise = ((key + i) * 1103515245 + 12345) & 0xFF;
-                        data[i] = (data[i] - noise + 256) % 256;
-                        data[i + 1] = (data[i + 1] - noise * 2 + 512) % 256;
-                        data[i + 2] = (data[i + 2] - noise * 3 + 768) % 256;
+                        const seed1 = ((key + i) * 1664525 + 1013904223) >>> 0;
+                        const seed2 = ((key + i + 1) * 1103515245 + 12345) >>> 0;
+                        const seed3 = ((key + i + 2) * 134775813 + 1) >>> 0;
+                        
+                        // 反向颜色置换
+                        data[i] = (data[i] - (seed1 % 256) + 256) % 256;
+                        data[i + 1] = (data[i + 1] - (seed2 % 256) + 256) % 256;
+                        data[i + 2] = (data[i + 2] - (seed3 % 256) + 256) % 256;
+                        
+                        // 反向异或解密
+                        data[i] = (data[i] ^ (seed1 & 0xFF) ^ ((seed1 >> 8) & 0xFF)) & 0xFF;
+                        data[i + 1] = (data[i + 1] ^ (seed2 & 0xFF) ^ ((seed2 >> 8) & 0xFF)) & 0xFF;
+                        data[i + 2] = (data[i + 2] ^ (seed3 & 0xFF) ^ ((seed3 >> 8) & 0xFF)) & 0xFF;
                     }
+                    
+                    console.log('颜色解密完成');
                     
                     // 第二步：提取所有像素
                     const pixels = [];
@@ -562,45 +583,33 @@
                         pixels.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
                     }
                     
-                    // 第三步：反向打乱（第二次）
-                    const indices2 = [];
-                    for (let i = 0; i < pixels.length; i++) {
-                        indices2.push(i);
-                    }
-                    for (let i = 0; i < pixels.length; i++) {
-                        const j = Math.abs(((key * 16807) ^ (i * 48271)) % pixels.length);
-                        [indices2[i], indices2[j]] = [indices2[j], indices2[i]];
-                    }
-                    const restored2 = new Array(pixels.length);
-                    for (let i = 0; i < indices2.length; i++) {
-                        restored2[indices2[i]] = pixels[i];
-                    }
+                    console.log('像素提取完成，总数:', pixels.length);
                     
-                    // 第四步：反向打乱（第一次）
-                    const indices1 = [];
-                    for (let i = 0; i < restored2.length; i++) {
-                        indices1.push(i);
-                    }
-                    for (let i = restored2.length - 1; i > 0; i--) {
-                        const j = Math.abs(((key * 2654435761) ^ (i * 2654435761)) % (i + 1));
-                        [indices1[i], indices1[j]] = [indices1[j], indices1[i]];
-                    }
-                    const restored1 = new Array(restored2.length);
-                    for (let i = 0; i < indices1.length; i++) {
-                        restored1[indices1[i]] = restored2[i];
-                    }
-                    
-                    // 写回并解密XOR
-                    for (let i = 0; i < restored1.length; i++) {
-                        data[i * 4] = restored1[i][0];
-                        data[i * 4 + 1] = restored1[i][1];
-                        data[i * 4 + 2] = restored1[i][2];
-                        data[i * 4 + 3] = restored1[i][3];
+                    // 第三步：三重反向打乱还原
+                    for (let round = 2; round >= 0; round--) {
+                        // 生成与加密时相同的交换序列
+                        const swaps = [];
+                        for (let i = pixels.length - 1; i > 0; i--) {
+                            const seed = (key * (i + 1) * (round + 1) * 2654435761) >>> 0;
+                            const j = seed % (i + 1);
+                            swaps.push([i, j]);
+                        }
                         
-                        const seed = (key + i * 4) * 2654435761;
-                        data[i * 4] ^= (seed >> 24) & 0xFF;
-                        data[i * 4 + 1] ^= (seed >> 16) & 0xFF;
-                        data[i * 4 + 2] ^= (seed >> 8) & 0xFF;
+                        // 反向执行交换（从后往前）
+                        for (let i = swaps.length - 1; i >= 0; i--) {
+                            const [a, b] = swaps[i];
+                            [pixels[a], pixels[b]] = [pixels[b], pixels[a]];
+                        }
+                        
+                        console.log('完成第', (2 - round + 1), '轮打乱还原');
+                    }
+                    
+                    // 写回还原的像素
+                    for (let i = 0; i < pixels.length; i++) {
+                        data[i * 4] = pixels[i][0];
+                        data[i * 4 + 1] = pixels[i][1];
+                        data[i * 4 + 2] = pixels[i][2];
+                        data[i * 4 + 3] = pixels[i][3];
                     }
 
                     ctx.putImageData(imageData, 0, 0);
@@ -613,8 +622,10 @@
                     processedImageData = canvas.toDataURL('image/png');
                     downloadBtn.disabled = false;
                     showStatus('图片解密成功！', 'success');
+                    console.log('解密完成！');
                 } catch (error) {
-                    showStatus('解密失败：密码错误或图片损坏', 'error');
+                    console.error('解密错误:', error);
+                    showStatus('解密失败：' + error.message, 'error');
                 } finally {
                     decryptBtn.innerHTML = '🔓 解密图片';
                     decryptBtn.disabled = false;
