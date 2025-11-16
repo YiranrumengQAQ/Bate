@@ -310,6 +310,14 @@
 
             <div class="status" id="status"></div>
 
+            <div class="log-area" id="logArea">
+                <div class="log-header">
+                    <span>📋 运行日志</span>
+                    <button class="btn-clear-log" id="clearLogBtn">清空</button>
+                </div>
+                <div class="log-content" id="logContent"></div>
+            </div>
+
             <div class="controls">
                 <div class="input-group">
                     <label for="password">🔑 加密密码</label>
@@ -603,8 +611,6 @@
                         data[i * 4 + 2] = pixels[i][2];
                         data[i * 4 + 3] = pixels[i][3];
                     }
-                    
-                    console.log('像素写回完成');
 
                     ctx.putImageData(imageData, 0, 0);
 
@@ -615,21 +621,10 @@
 
                     processedImageData = canvas.toDataURL('image/png');
                     downloadBtn.disabled = false;
-                    
-                    // 检查解密后的图片是否有效
-                    // 简单的检查：如果解密后的图片大部分是纯色（比如全黑或全白），可能密码错误
-                    const checkData = processedCtx.getImageData(0, 0, 10, 10).data;
-                    let avgR = 0;
-                    for(let i=0; i < checkData.length; i+=4) avgR += checkData[i];
-                    avgR = avgR / (checkData.length / 4);
-                    
-                    if (avgR < 10 || avgR > 245) {
-                         showStatus('解密完成，但密码可能不正确！', 'error');
-                    } else {
-                         showStatus('图片解密成功！', 'success');
-                    }
-
+                    showStatus('图片解密成功！', 'success');
+                    console.log('解密完成！');
                 } catch (error) {
+                    console.error('解密错误:', error);
                     showStatus('解密失败：' + error.message, 'error');
                 } finally {
                     decryptBtn.innerHTML = '🔓 解密图片';
@@ -639,15 +634,37 @@
         });
 
         downloadBtn.addEventListener('click', () => {
-            if (!processedImageData) {
-                showStatus('没有可下载的图片！', 'error');
-                return;
+            if (!processedImageData) return;
+
+            try {
+                // 将base64转换为blob
+                const arr = processedImageData.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1].replace(MAGIC_HEADER, ''));
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                const blob = new Blob([u8arr], { type: mime });
+
+                // 创建下载链接
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const timestamp = new Date().getTime();
+                link.download = isEncrypted ? `decrypted_${timestamp}.png` : `encrypted_${timestamp}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 释放URL对象
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
+                showStatus('图片下载成功！', 'success');
+            } catch (error) {
+                showStatus('下载失败：' + error.message, 'error');
             }
-            const link = document.createElement('a');
-            link.href = processedImageData;
-            link.download = 'processed_image.png';
-            link.click();
-            showStatus('图片已开始下载！', 'success');
         });
 
         function showStatus(message, type) {
@@ -656,9 +673,8 @@
             status.style.display = 'block';
             setTimeout(() => {
                 status.style.display = 'none';
-            }, 4000);
+            }, 3000);
         }
-
     </script>
 </body>
 </html>
