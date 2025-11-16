@@ -450,12 +450,39 @@
                     const data = imageData.data;
                     const key = hashPassword(password);
 
+                    // 更强的加密：打乱像素顺序 + XOR加密
                     for (let i = 0; i < data.length; i += 4) {
-                        if (i < data.length - 1) {
-                            data[i] ^= (key >> 16) & 0xFF;
-                            data[i + 1] ^= (key >> 8) & 0xFF;
-                            data[i + 2] ^= key & 0xFF;
+                        // XOR加密每个颜色通道
+                        data[i] ^= (key >> 16) & 0xFF;
+                        data[i + 1] ^= (key >> 8) & 0xFF;
+                        data[i + 2] ^= key & 0xFF;
+                        
+                        // 额外混淆：按位取反部分像素
+                        if (i % 8 === 0) {
+                            data[i] = 255 - data[i];
+                            data[i + 1] = 255 - data[i + 1];
+                            data[i + 2] = 255 - data[i + 2];
                         }
+                    }
+                    
+                    // 像素位置打乱
+                    const pixels = [];
+                    for (let i = 0; i < data.length; i += 4) {
+                        pixels.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
+                    }
+                    
+                    // 使用密码作为种子打乱像素
+                    for (let i = pixels.length - 1; i > 0; i--) {
+                        const j = Math.abs((key * (i + 1)) % (i + 1));
+                        [pixels[i], pixels[j]] = [pixels[j], pixels[i]];
+                    }
+                    
+                    // 将打乱的像素写回
+                    for (let i = 0; i < pixels.length; i++) {
+                        data[i * 4] = pixels[i][0];
+                        data[i * 4 + 1] = pixels[i][1];
+                        data[i * 4 + 2] = pixels[i][2];
+                        data[i * 4 + 3] = pixels[i][3];
                     }
 
                     ctx.putImageData(imageData, 0, 0);
@@ -545,12 +572,35 @@
         downloadBtn.addEventListener('click', () => {
             if (!processedImageData) return;
 
-            const link = document.createElement('a');
-            const timestamp = new Date().getTime();
-            link.download = isEncrypted ? `decrypted_${timestamp}.png` : `encrypted_${timestamp}.png`;
-            link.href = processedImageData;
-            link.click();
-            showStatus('图片下载成功！', 'success');
+            try {
+                // 将base64转换为blob
+                const arr = processedImageData.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1].replace(MAGIC_HEADER, ''));
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                const blob = new Blob([u8arr], { type: mime });
+
+                // 创建下载链接
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const timestamp = new Date().getTime();
+                link.download = isEncrypted ? `decrypted_${timestamp}.png` : `encrypted_${timestamp}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 释放URL对象
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
+                showStatus('图片下载成功！', 'success');
+            } catch (error) {
+                showStatus('下载失败：' + error.message, 'error');
+            }
         });
 
         function showStatus(message, type) {
