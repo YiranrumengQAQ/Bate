@@ -450,39 +450,45 @@
                     const data = imageData.data;
                     const key = hashPassword(password);
 
-                    // 更强的加密：打乱像素顺序 + XOR加密
-                    for (let i = 0; i < data.length; i += 4) {
-                        // XOR加密每个颜色通道
-                        data[i] ^= (key >> 16) & 0xFF;
-                        data[i + 1] ^= (key >> 8) & 0xFF;
-                        data[i + 2] ^= key & 0xFF;
-                        
-                        // 额外混淆：按位取反部分像素
-                        if (i % 8 === 0) {
-                            data[i] = 255 - data[i];
-                            data[i + 1] = 255 - data[i + 1];
-                            data[i + 2] = 255 - data[i + 2];
-                        }
-                    }
-                    
-                    // 像素位置打乱
+                    // 第一步：像素位置完全随机打乱
+                    const totalPixels = data.length / 4;
                     const pixels = [];
                     for (let i = 0; i < data.length; i += 4) {
                         pixels.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
                     }
                     
-                    // 使用密码作为种子打乱像素
-                    for (let i = pixels.length - 1; i > 0; i--) {
-                        const j = Math.abs((key * (i + 1)) % (i + 1));
-                        [pixels[i], pixels[j]] = [pixels[j], pixels[i]];
+                    // 三重打乱确保完全随机
+                    for (let round = 0; round < 3; round++) {
+                        for (let i = pixels.length - 1; i > 0; i--) {
+                            const seed = (key * (i + 1) * (round + 1) * 2654435761) >>> 0;
+                            const j = seed % (i + 1);
+                            [pixels[i], pixels[j]] = [pixels[j], pixels[i]];
+                        }
                     }
                     
-                    // 将打乱的像素写回
+                    // 写回打乱的像素
                     for (let i = 0; i < pixels.length; i++) {
                         data[i * 4] = pixels[i][0];
                         data[i * 4 + 1] = pixels[i][1];
                         data[i * 4 + 2] = pixels[i][2];
                         data[i * 4 + 3] = pixels[i][3];
+                    }
+                    
+                    // 第二步：每个像素RGB值完全加密
+                    for (let i = 0; i < data.length; i += 4) {
+                        const seed1 = ((key + i) * 1664525 + 1013904223) >>> 0;
+                        const seed2 = ((key + i + 1) * 1103515245 + 12345) >>> 0;
+                        const seed3 = ((key + i + 2) * 134775813 + 1) >>> 0;
+                        
+                        // 强力异或加密
+                        data[i] = (data[i] ^ (seed1 & 0xFF) ^ ((seed1 >> 8) & 0xFF)) & 0xFF;
+                        data[i + 1] = (data[i + 1] ^ (seed2 & 0xFF) ^ ((seed2 >> 8) & 0xFF)) & 0xFF;
+                        data[i + 2] = (data[i + 2] ^ (seed3 & 0xFF) ^ ((seed3 >> 8) & 0xFF)) & 0xFF;
+                        
+                        // 额外的颜色置换
+                        data[i] = (data[i] + (seed1 % 256)) % 256;
+                        data[i + 1] = (data[i + 1] + (seed2 % 256)) % 256;
+                        data[i + 2] = (data[i + 2] + (seed3 % 256)) % 256;
                     }
 
                     ctx.putImageData(imageData, 0, 0);
@@ -542,12 +548,59 @@
                     const data = imageData.data;
                     const key = hashPassword(password);
 
+                    // 第一步：移除噪点
                     for (let i = 0; i < data.length; i += 4) {
-                        if (i < data.length - 1) {
-                            data[i] ^= (key >> 16) & 0xFF;
-                            data[i + 1] ^= (key >> 8) & 0xFF;
-                            data[i + 2] ^= key & 0xFF;
-                        }
+                        const noise = ((key + i) * 1103515245 + 12345) & 0xFF;
+                        data[i] = (data[i] - noise + 256) % 256;
+                        data[i + 1] = (data[i + 1] - noise * 2 + 512) % 256;
+                        data[i + 2] = (data[i + 2] - noise * 3 + 768) % 256;
+                    }
+                    
+                    // 第二步：提取所有像素
+                    const pixels = [];
+                    for (let i = 0; i < data.length; i += 4) {
+                        pixels.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
+                    }
+                    
+                    // 第三步：反向打乱（第二次）
+                    const indices2 = [];
+                    for (let i = 0; i < pixels.length; i++) {
+                        indices2.push(i);
+                    }
+                    for (let i = 0; i < pixels.length; i++) {
+                        const j = Math.abs(((key * 16807) ^ (i * 48271)) % pixels.length);
+                        [indices2[i], indices2[j]] = [indices2[j], indices2[i]];
+                    }
+                    const restored2 = new Array(pixels.length);
+                    for (let i = 0; i < indices2.length; i++) {
+                        restored2[indices2[i]] = pixels[i];
+                    }
+                    
+                    // 第四步：反向打乱（第一次）
+                    const indices1 = [];
+                    for (let i = 0; i < restored2.length; i++) {
+                        indices1.push(i);
+                    }
+                    for (let i = restored2.length - 1; i > 0; i--) {
+                        const j = Math.abs(((key * 2654435761) ^ (i * 2654435761)) % (i + 1));
+                        [indices1[i], indices1[j]] = [indices1[j], indices1[i]];
+                    }
+                    const restored1 = new Array(restored2.length);
+                    for (let i = 0; i < indices1.length; i++) {
+                        restored1[indices1[i]] = restored2[i];
+                    }
+                    
+                    // 写回并解密XOR
+                    for (let i = 0; i < restored1.length; i++) {
+                        data[i * 4] = restored1[i][0];
+                        data[i * 4 + 1] = restored1[i][1];
+                        data[i * 4 + 2] = restored1[i][2];
+                        data[i * 4 + 3] = restored1[i][3];
+                        
+                        const seed = (key + i * 4) * 2654435761;
+                        data[i * 4] ^= (seed >> 24) & 0xFF;
+                        data[i * 4 + 1] ^= (seed >> 16) & 0xFF;
+                        data[i * 4 + 2] ^= (seed >> 8) & 0xFF;
                     }
 
                     ctx.putImageData(imageData, 0, 0);
