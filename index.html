@@ -3,924 +3,564 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全新布局 智能水印工具</title>
-    
+    <title>图片加密解密工具</title>
     <style>
-        /* 1. 全局和基础样式 - Microsoft Fluent 风格 */
-        :root {
-            --primary-color: #0078d4;
-            --primary-hover: #005a9e;
-            --primary-focus-ring: rgba(0, 120, 212, 0.3);
-            --success-color: #107c10;
-            --font-main: "Segoe UI V2", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
-            
-            /* 默认亮色主题 */
-            --bg-color: #f5f5f5;
-            --card-color: #ffffff;
-            --text-color: #1c1c1c;
-            --text-muted: #606060;
-            --border-color: #e1e1e1;
-            --input-bg: #ffffff;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #1c1c1c;
-                --card-color: #2d2d2d;
-                --text-color: #f1f1f1;
-                --text-muted: #a1a1a1;
-                --border-color: #444444;
-                --input-bg: #252525;
-            }
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            overflow: hidden; /* 关键：防止页面滚动 */
-        }
-
-        /* 2. 全新布局 (Flex 垂直布局) */
         body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        main {
-            flex-grow: 1; /* 占据所有剩余空间 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* 3. 预览区域 (全屏) */
-        #preview-area {
-            width: 100%;
-            height: 100%;
-            background: var(--card-color);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        #preview-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        #preview-image {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            border-radius: 6px;
-            user-select: none;
-            animation: fadeInApp 0.5s ease-out;
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            overflow: hidden;
         }
-        
-        #placeholder-text {
-            color: var(--text-muted);
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            font-size: 1.1rem;
-            user-select: none;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
         }
-        
-        /* 隐藏的默认文件上传按钮 */
-        #upload-btn {
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .upload-area h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 1em;
+        }
+
+        input[type="file"] {
             display: none;
         }
 
-
-        /* 4. 水印预览层 */
-        #watermark-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            text-shadow: 0 0 3px rgba(0,0,0,0.4);
-            user-select: none;
-            white-space: nowrap; 
-            transition: transform 0.1s ease-out;
-            transform-origin: top left;
-        }
-        @media (prefers-color-scheme: dark) {
-            #watermark-preview {
-                text-shadow: 0 0 5px rgba(0,0,0,0.5);
-            }
-        }
-
-        /* 5. 抽屉式控制面板 (Modal) */
-        #controls-panel {
-            position: fixed;
-            top: 0;
-            right: -400px; /* 默认隐藏在右侧 */
-            width: 400px;
-            height: 100vh;
-            background: var(--card-color);
-            box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-            z-index: 1001;
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            flex-direction: column;
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            overflow-y: auto;
-            padding: 24px;
-        }
-        
-        #controls-panel.is-open {
-            transform: translateX(-400px); /* 滑入屏幕 */
-        }
-        
-        /* 遮罩层 */
-        #modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-out;
-        }
-        #modal-overlay.is-open {
-            opacity: 1;
-            pointer-events: auto;
+            margin-bottom: 30px;
         }
 
-        /* 控制面板标题和关闭按钮 */
-        .controls-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-        .controls-header h2 {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            font-weight: 300;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0 10px;
-        }
-        .btn-close:hover {
-            color: var(--text-color);
-        }
-
-        /* 响应式：PE (移动端) - 底部上拉抽屉 */
-        @media (max-width: 900px) {
-            main {
-                padding: 10px;
-            }
-            #controls-panel {
-                width: 100%;
-                height: 80vh; /* 占据 80% 屏幕高度 */
-                top: 100vh; /* 默认隐藏在底部 */
-                right: 0;
-                transform: translateY(0);
-                transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-                border-top-left-radius: 12px;
-                border-top-right-radius: 12px;
-            }
-            #controls-panel.is-open {
-                transform: translateY(-80vh); /* 上滑 80% */
-            }
-        }
-
-
-        /* 6. 表单控件 (Fluent 风格) */
-        .control-group {
+        .input-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
         }
-        .control-group label {
+
+        .input-group label {
+            color: #333;
             font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-color);
-            margin-bottom: 0;
+            margin-bottom: 8px;
+            font-size: 0.95em;
         }
-        
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 10px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-color);
-            font-size: 0.95rem;
-            font-family: var(--font-main);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+
+        .input-group input {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
         }
-        
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23606060' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.7rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        @media (prefers-color-scheme: dark) {
-            select {
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1a1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-encrypt {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-encrypt:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-decrypt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-decrypt:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-download:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .preview-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .preview-box {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .preview-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .preview-box canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        /* 响应式布局 */
+        @media (min-width: 768px) {
+            .preview-area {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
             }
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px var(--primary-focus-ring);
+        @media (max-width: 767px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .upload-area {
+                padding: 40px 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
         }
 
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 5px;
-            outline: none;
-            cursor: pointer;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
+        .loading {
+            display: inline-block;
             width: 20px;
             height: 20px;
-            background: var(--primary-color);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: var(--primary-hover);
-        }
-        
-        .color-picker-wrapper { display: flex; align-items: center; gap: 10px; }
-        input[type="color"] {
-            -webkit-appearance: none;
-            width: 38px;
-            height: 38px;
-            border: none;
-            padding: 0;
-            border-radius: 6px;
-            background-color: transparent;
-            cursor: pointer;
-        }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
         }
 
-        /* 7. 按钮 (Fluent 风格) */
-        .btn {
-            padding: 10px 16px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border: 1px solid transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-            text-align: center;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        .btn:active { 
-            transform: translateY(0); 
-        }
-        .btn:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px var(--primary-focus-ring);
-        }
-
-        .btn-primary { 
-            background: var(--primary-color); 
-            color: white; 
-            border-color: var(--primary-color);
-        }
-        .btn-primary:hover { 
-            background: var(--primary-hover); 
-            border-color: var(--primary-hover);
-        }
-
-        .btn-success { 
-            background: var(--success-color); 
-            color: white; 
-            border-color: var(--success-color);
-        }
-        .btn-success:hover { 
-            background: #0d5c0d; 
-            border-color: #0d5c0d;
-        }
-        
-        .btn-secondary { 
-            background: var(--card-color); 
-            color: var(--text-color); 
-            border-color: var(--border-color);
-        }
-        .btn-secondary:hover { 
-            background: var(--bg-color);
-            border-color: var(--text-muted);
-        }
-        
-        .btn-info {
-            background: var(--card-color);
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        .btn-info:hover {
-            background: var(--input-bg);
-        }
-        
-        .btn-preview {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        .btn-preview:hover {
-            background: var(--primary-hover);
-            border-color: var(--primary-hover);
-        }
-
-        #final-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        #final-actions button {
-            grid-column: span 1;
-        }
-        #final-actions .btn-success {
-            grid-column: 1 / -1; 
-        }
-
-        /* 8. 进度条 */
-        .progress-bar-container {
-            width: 100%;
-            background: var(--border-color);
-            border-radius: 4px;
-            height: 8px;
-            overflow: hidden;
-            display: none;
-            margin-top: 10px;
-        }
-        .progress-bar {
-            width: 0;
-            height: 100%;
-            background: var(--primary-color);
-            border-radius: 4px;
-            transition: width 0.4s ease;
-        }
-        .progress-bar.loading {
-            width: 100%;
-            transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        /* 9. Footer 样式 */
-        footer {
-            background-color: var(--card-color);
-            color: var(--text-muted);
-            padding: 10px 20px;
-            font-size: 0.85rem;
-            text-align: center;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            flex-shrink: 0; /* 防止 footer 缩放 */
-        }
-
-        footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        footer a:hover {
-            color: var(--primary-hover);
-            text-decoration: underline;
-        }
-        
-        @keyframes fadeInApp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 图片加密解密工具</h1>
+            <p>安全保护您的图片隐私</p>
+        </div>
 
-    <main>
-        <section id="preview-area">
-            <div id="preview-container">
-                <img id="preview-image" src="" alt="" style="display: none;">
-                <div id="watermark-preview"></div>
-                <div id="placeholder-text">
-                    <span>请先上传一张图片以开始</span>
-                    <label for="upload-btn" class="btn btn-primary">点击上传图片</label>
+        <div class="content">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>选择或拖拽图片文件</h3>
+                <p>支持 JPG, PNG, GIF, BMP, WEBP 等所有图片格式</p>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <div class="status" id="status"></div>
+
+            <div class="controls">
+                <div class="input-group">
+                    <label for="password">🔑 加密密码</label>
+                    <input type="password" id="password" placeholder="请输入密码">
                 </div>
             </div>
-        </section>
-    </main>
 
-    <section id="controls-panel">
-        <div class="controls-header">
-            <h2>高级设置</h2>
-            <button id="close-settings-btn" class="btn-close">&times;</button>
-        </div>
+            <div class="button-group">
+                <button class="btn-encrypt" id="encryptBtn" disabled>🔒 加密图片</button>
+                <button class="btn-decrypt" id="decryptBtn" disabled>🔓 解密图片</button>
+                <button class="btn-download" id="downloadBtn" disabled>💾 下载图片</button>
+            </div>
 
-        <div class="control-group">
-            <label for="upload-btn-panel" class="btn btn-primary">1. 重新上传图片</label>
-            <input type="file" id="upload-btn" accept="image/*">
-            <div class="progress-bar-container" id="upload-progress-container">
-                <div class="progress-bar" id="upload-progress"></div>
+            <div class="preview-area">
+                <div class="preview-box">
+                    <h3>原始图片</h3>
+                    <canvas id="originalCanvas"></canvas>
+                </div>
+                <div class="preview-box">
+                    <h3>处理后图片</h3>
+                    <canvas id="processedCanvas"></canvas>
+                </div>
             </div>
         </div>
-
-        <div class="control-group">
-            <label for="watermark-text">2. 水印内容</label>
-            <input type="text" id="watermark-text">
-        </div>
-        
-        <div class="control-group">
-            <label for="font-family">3. 字体</label>
-            <select id="font-family">
-                <option value='-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'>默认 (无衬线)</option>
-                <option value='"Times New Roman", Times, serif'>衬线体 (Serif)</option>
-                <option value='"Courier New", Courier, monospace'>等宽体 (Monospace)</option>
-                <option value='Cursive, "Comic Sans MS"'>手写体 (Cursive)</option>
-            </select>
-        </div>
-        
-        <div class="control-group">
-            <label for="font-weight">4. 粗细</label>
-            <select id="font-weight">
-                <option value="normal">常规</option>
-                <option value="bold">加粗</option>
-            </select>
-        </div>
-        
-        <div class="control-group">
-            <label for="font-size">5. 字体大小 ( <span id="font-size-value">30</span> px )</label>
-            <input type="range" id="font-size" min="10" max="300" value="30">
-        </div>
-
-        <div class="control-group">
-            <label for="font-color">6. 字体颜色</label>
-            <div class="color-picker-wrapper">
-                <input type="color" id="font-color" value="#FFFFFF">
-                <input type="text" id="font-color-hex" value="#FFFFFF">
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label for="opacity">7. 透明度 ( <span id="opacity-value">0.7</span> )</label>
-            <input type="range" id="opacity" min="0" max="1" step="0.01" value="0.7">
-        </div>
-        
-        <div class="control-group">
-            <label for="rotation">8. 旋转 ( <span id="rotation-value">0</span> ° )</label>
-            <input type="range" id="rotation" min="-90" max="90" step="1" value="0">
-        </div>
-        
-        <div class="control-group">
-            <label for="pos-x">9. 水平位置 (X) ( <span id="pos-x-value">10</span> px )</label>
-            <input type="range" id="pos-x" min="0" max="1000" value="10">
-        </div>
-        
-        <div class="control-group">
-            <label for="pos-y">10. 垂直位置 (Y) ( <span id="pos-y-value">10</span> px )</label>
-            <input type="range" id="pos-y" min="0" max="1000" value="10">
-        </div>
-        
-        <div class="control-group" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
-            <div id="final-actions">
-                <button id="smart-adapt-btn" class="btn btn-info">智能适配 (底部居中)</button>
-                <button id="reset-btn" class="btn btn-secondary">恢复默认 (左上角)</button>
-                
-                <button id="online-preview-btn" class="btn btn-preview">在线预览</button>
-                <button id="download-btn" class="btn btn-success">生成并下载图片</button>
-            </div>
-            <div class="progress-bar-container" id="download-progress-container">
-                <div class="progress-bar" id="download-progress"></div>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <a href="#" id="open-settings-btn">打开设置</a>
-        <a href="#" id="share-website-btn">分享网站</a>
-        <a href="https://imgbox.com/jRusEHe7" target="_blank" rel="noopener noreferrer">赞助我们</a>
-    </footer>
-
-    <div id="modal-overlay"></div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        const MAGIC_HEADER = 'ENC_IMG_V1_';
+        
+        let currentImage = null;
+        let processedImageData = null;
+        let isEncrypted = false;
 
-            // --- 1. 获取所有DOM元素 ---
-            const uploadBtn = document.getElementById('upload-btn');
-            const previewImage = document.getElementById('preview-image');
-            const watermarkPreview = document.getElementById('watermark-preview');
-            const placeholderText = document.getElementById('placeholder-text');
-            
-            const textInput = document.getElementById('watermark-text');
-            const fontFamilyInput = document.getElementById('font-family');
-            const fontWeightInput = document.getElementById('font-weight');
-            const fontSizeInput = document.getElementById('font-size');
-            const fontSizeValue = document.getElementById('font-size-value');
-            const fontColorInput = document.getElementById('font-color');
-            const fontColorHex = document.getElementById('font-color-hex');
-            const opacityInput = document.getElementById('opacity');
-            const opacityValue = document.getElementById('opacity-value');
-            const rotationInput = document.getElementById('rotation');
-            const rotationValue = document.getElementById('rotation-value');
-            const posXInput = document.getElementById('pos-x');
-            const posXValue = document.getElementById('pos-x-value');
-            const posYInput = document.getElementById('pos-y');
-            const posYValue = document.getElementById('pos-y-value');
-            
-            const resetBtn = document.getElementById('reset-btn');
-            const smartAdaptBtn = document.getElementById('smart-adapt-btn');
-            const onlinePreviewBtn = document.getElementById('online-preview-btn');
-            const downloadBtn = document.getElementById('download-btn');
-            const shareWebsiteBtn = document.getElementById('share-website-btn');
-            
-            const uploadProgressContainer = document.getElementById('upload-progress-container');
-            const uploadProgressBar = document.getElementById('upload-progress');
-            const downloadProgressContainer = document.getElementById('download-progress-container');
-            const downloadProgressBar = document.getElementById('download-progress');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const passwordInput = document.getElementById('password');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const status = document.getElementById('status');
 
-            // 新增：抽屉布局元素
-            const openSettingsBtn = document.getElementById('open-settings-btn');
-            const closeSettingsBtn = document.getElementById('close-settings-btn');
-            const modalOverlay = document.getElementById('modal-overlay');
-            const controlsPanel = document.getElementById('controls-panel');
-
-            let originalImage = null;
-            let currentFile = null;
-            let isPreviewingWatermarked = false;
-
-            // --- 2. 辅助函数 ---
-            function getFormattedDateTime() {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = (now.getMonth() + 1).toString().padStart(2, '0');
-                const day = now.getDate().toString().padStart(2, '0');
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                return `${year}年${month}月${day}日 ${hours}:${minutes}`;
-            }
-
-            function showSimulatedProgress(container, bar, onComplete) {
-                container.style.display = 'block';
-                bar.style.width = '0%';
-                bar.classList.remove('loading');
-                void bar.offsetWidth; 
-                bar.classList.add('loading');
-                setTimeout(() => {
-                    if (onComplete) onComplete();
-                    setTimeout(() => {
-                        container.style.display = 'none';
-                        bar.classList.remove('loading');
-                        bar.style.width = '0%';
-                    }, 500);
-                }, 1500);
-            }
-
-            function drawWatermarkToCanvas(img) {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                
-                ctx.drawImage(img, 0, 0);
-                ctx.save();
-
-                const x = parseFloat(posXInput.value);
-                const y = parseFloat(posYInput.value);
-                const angleInRadians = parseFloat(rotationInput.value) * Math.PI / 180;
-                
-                ctx.font = `${fontWeightInput.value} ${fontSizeInput.value}px ${fontFamilyInput.value}`;
-                ctx.fillStyle = fontColorInput.value;
-                ctx.globalAlpha = opacityInput.value;
-                
-                const metrics = ctx.measureText(textInput.value);
-                const yBaseline = y + metrics.actualBoundingBoxAscent;
-
-                ctx.translate(x, yBaseline);
-                ctx.rotate(angleInRadians);
-                ctx.fillText(textInput.value, 0, 0);
-                
-                ctx.restore();
-                return canvas.toDataURL('image/png');
-            }
-            
-            // --- 3. 核心功能：默认模式 ---
-
-            function applyFixedDefault() {
-                textInput.value = getFormattedDateTime();
-                fontColorInput.value = '#FFFFFF';
-                opacityInput.value = 0.7;
-                fontFamilyInput.value = fontFamilyInput.options[0].value;
-                fontWeightInput.value = 'normal';
-                rotationInput.value = 0;
-                fontSizeInput.value = 30;
-                posXInput.value = 10;
-                posYInput.value = 10;
-                
-                if (originalImage) {
-                    posXInput.max = originalImage.width;
-                    posYInput.max = originalImage.height;
-                    previewImage.src = originalImage.src;
-                    isPreviewingWatermarked = false;
-                } else {
-                    previewImage.src = '';
-                    previewImage.style.display = 'none';
-                    placeholderText.style.display = 'flex'; // 保持flex布局
-                }
-                
-                updateControlValues();
-                updatePreview();
-            }
-
-            function applySmartAdaptLogic() {
-                textInput.value = getFormattedDateTime();
-                fontColorInput.value = '#FFFFFF';
-                opacityInput.value = 0.7;
-                fontFamilyInput.value = fontFamilyInput.options[0].value;
-                fontWeightInput.value = 'normal';
-                rotationInput.value = 0;
-
-                if (originalImage) {
-                    const imgWidth = originalImage.width;
-                    const imgHeight = originalImage.height;
-
-                    let smartFontSize = Math.round(imgWidth / 35);
-                    smartFontSize = Math.max(16, Math.min(smartFontSize, 60));
-                    fontSizeInput.value = smartFontSize;
-
-                    const paddingY = imgHeight * 0.02;
-                    const estimatedTextWidth = textInput.value.length * (smartFontSize * 0.55);
-                    let smartPosX = (imgWidth / 2) - (estimatedTextWidth / 2);
-                    let smartPosY = imgHeight - smartFontSize - paddingY;
-
-                    smartPosX = Math.max(0, smartPosX);
-                    smartPosY = Math.max(0, smartPosY);
-                    
-                    posXInput.value = smartPosX;
-                    posYInput.value = smartPosY;
-                    previewImage.src = originalImage.src;
-                    isPreviewingWatermarked = false;
-                } else {
-                    fontSizeInput.value = 30;
-                    posXInput.value = 10;
-                    posYInput.value = 10;
-                    previewImage.src = '';
-                    previewImage.style.display = 'none';
-                    placeholderText.style.display = 'flex';
-                }
-                
-                updateControlValues();
-                updatePreview();
-            }
-
-            function updatePreview() {
-                if (!originalImage || !previewImage.src) {
-                    watermarkPreview.innerText = '';
-                    watermarkPreview.style.display = 'none';
-                    return;
-                }
-
-                if (isPreviewingWatermarked) {
-                    watermarkPreview.style.display = 'none';
-                    return;
-                } else {
-                    watermarkPreview.style.display = 'block';
-                }
-
-                const text = textInput.value;
-                const size = fontSizeInput.value;
-                const color = fontColorInput.value;
-                const opacity = opacityInput.value;
-                const family = fontFamilyInput.value;
-                const weight = fontWeightInput.value;
-                const rotation = rotationInput.value;
-                
-                // 关键：始终基于 originalImage 计算缩放
-                const previewRect = previewContainer.getBoundingClientRect();
-                const imgAspect = originalImage.width / originalImage.height;
-                const previewAspect = previewRect.width / previewRect.height;
-
-                let scale;
-                if (imgAspect > previewAspect) {
-                    scale = previewRect.width / originalImage.width;
-                } else {
-                    scale = previewRect.height / originalImage.height;
-                }
-
-                const x = posXInput.value * scale;
-                const y = posYInput.value * scale;
-
-                watermarkPreview.style.font = `${weight} ${size * scale}px ${family}`;
-                watermarkPreview.style.color = color;
-                watermarkPreview.style.opacity = opacity;
-                watermarkPreview.style.left = `${x}px`;
-                watermarkPreview.style.top = `${y}px`;
-                watermarkPreview.style.transform = `rotate(${rotation}deg)`;
-                watermarkPreview.innerText = text;
-            }
-
-            function updateControlValues() {
-                fontSizeValue.innerText = fontSizeInput.value;
-                opacityValue.innerText = opacityInput.value;
-                rotationValue.innerText = rotationInput.value;
-                posXValue.innerText = Math.round(posXInput.value);
-                posYValue.innerText = Math.round(posYInput.value);
-                fontColorHex.value = fontColorInput.value;
-
-                if (isPreviewingWatermarked) {
-                    isPreviewingWatermarked = false;
-                    updatePreview();
-                }
-            }
-
-            // --- 4. 事件监听器 ---
-
-            // **BUG 修复**：这是上次被截断的完整函数
-            uploadBtn.addEventListener('change', (e) => {
-                currentFile = e.target.files[0];
-                if (currentFile) {
-                    // 开始模拟进度
-                    showSimulatedProgress(uploadProgressContainer, uploadProgressBar, () => {
-                        // 进度完成后的回调
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            originalImage = new Image();
-                            originalImage.onload = () => {
-                                // 原始图片加载完成
-                                previewImage.src = event.target.result;
-                                previewImage.style.display = 'block'; // 显示图片
-                                placeholderText.style.display = 'none'; // 隐藏占位符
-
-                                // 更新滑块最大值
-                                posXInput.max = originalImage.width;
-                                posYInput.max = originalImage.height * 1.2;
-                                
-                                // 应用智能默认值
-                                applySmartAdaptLogic(); 
-                                
-                                // 确保预览
-                                setTimeout(updatePreview, 100); 
-                            };
-                            originalImage.onerror = () => { alert('图片加载失败'); };
-                            originalImage.src = event.target.result; // 触发 Image.onload
-                        };
-                        reader.onerror = () => { alert('文件读取失败'); };
-                        reader.readAsDataURL(currentFile); // 开始读取文件
-                    });
-                }
-            });
-
-            // 所有控制项
-            const controls = [
-                textInput, fontSizeInput, fontColorInput, opacityInput, 
-                fontFamilyInput, fontWeightInput, rotationInput, 
-                posXInput, posYInput
-            ];
-            controls.forEach(control => {
-                control.addEventListener('input', () => {
-                    updateControlValues();
-                    updatePreview();
-                });
-            });
-            
-            // 模式按钮
-            resetBtn.addEventListener('click', applyFixedDefault);
-            smartAdaptBtn.addEventListener('click', applySmartAdaptLogic);
-
-            // 在线预览
-            onlinePreviewBtn.addEventListener('click', () => {
-                if (!originalImage) {
-                    alert('请先上传一张图片！');
-                    return;
-                }
-                const dataUrl = drawWatermarkToCanvas(originalImage);
-                previewImage.src = dataUrl;
-                isPreviewingWatermarked = true; // 设置状态
-                updatePreview(); // 更新（隐藏动态水印）
-            });
-
-            // 下载
-            downloadBtn.addEventListener('click', () => {
-                if (!originalImage) {
-                    alert('请先上传一张图片！');
-                    return;
-                }
-                
-                showSimulatedProgress(downloadProgressContainer, downloadProgressBar, () => {
-                    // 无论当前预览的是什么，下载时都使用原始图片
-                    const dataUrl = drawWatermarkToCanvas(originalImage);
-                    const link = document.createElement('a');
-                    link.href = dataUrl;
-                    link.download = `watermarked_${new Date().getTime()}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            });
-
-            // 新增：抽屉控制
-            function openModal() {
-                controlsPanel.classList.add('is-open');
-                modalOverlay.classList.add('is-open');
-            }
-            function closeModal() {
-                controlsPanel.classList.remove('is-open');
-                modalOverlay.classList.remove('is-open');
-            }
-            openSettingsBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal();
-            });
-            closeSettingsBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', closeModal);
-
-            // 新增：分享按钮
-            shareWebsiteBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const url = window.location.href;
-                if (navigator.share) {
-                    // 优先使用 Web Share API
-                    navigator.share({
-                        title: '分享水印工具',
-                        text: '我发现了一个好用的在线水印工具！',
-                        url: url
-                    }).catch(console.error);
-                } else if (navigator.clipboard) {
-                    // 其次尝试复制到剪贴板
-                    navigator.clipboard.writeText(url).then(() => {
-                        alert('网站链接已复制到剪贴板！');
-                    }, () => {
-                        alert('复制失败，请手动复制链接。');
-                    });
-                } else {
-                    alert('请手动复制浏览器地址栏中的链接。');
-                }
-            });
-            
-            // --- 5. 响应式与加载支持 ---
-            window.addEventListener('resize', updatePreview);
-            previewImage.addEventListener('load', updatePreview); // 当 src 更改时重新计算
-
-            // --- 6. 初始化 ---
-            applyFixedDefault(); // 初始加载时使用固定默认（无图状态）
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
         });
-    </script>
 
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                loadImage(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadImage(file);
+        });
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    drawOriginal(img);
+                    checkIfEncrypted(e.target.result);
+                    encryptBtn.disabled = false;
+                    showStatus('图片加载成功！', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawOriginal(img) {
+            originalCanvas.width = img.width;
+            originalCanvas.height = img.height;
+            const ctx = originalCanvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+        }
+
+        function checkIfEncrypted(dataUrl) {
+            if (dataUrl.includes(MAGIC_HEADER)) {
+                isEncrypted = true;
+                decryptBtn.disabled = false;
+                encryptBtn.disabled = true;
+                showStatus('检测到加密图片！可以解密', 'info');
+            } else {
+                isEncrypted = false;
+                decryptBtn.disabled = true;
+                encryptBtn.disabled = false;
+            }
+        }
+
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        encryptBtn.addEventListener('click', () => {
+            const password = passwordInput.value;
+            if (!password) {
+                showStatus('请输入加密密码！', 'error');
+                return;
+            }
+            if (!currentImage) {
+                showStatus('请先选择图片！', 'error');
+                return;
+            }
+
+            encryptBtn.innerHTML = '<span class="loading"></span> 加密中...';
+            encryptBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = currentImage.width;
+                    canvas.height = currentImage.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(currentImage, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    const key = hashPassword(password);
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        if (i < data.length - 1) {
+                            data[i] ^= (key >> 16) & 0xFF;
+                            data[i + 1] ^= (key >> 8) & 0xFF;
+                            data[i + 2] ^= key & 0xFF;
+                        }
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    ctx.font = 'bold 30px Arial';
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.save();
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(-Math.PI / 6);
+                    ctx.fillText('🔒 ENCRYPTED', 0, 0);
+                    ctx.restore();
+
+                    processedCanvas.width = canvas.width;
+                    processedCanvas.height = canvas.height;
+                    const processedCtx = processedCanvas.getContext('2d');
+                    processedCtx.drawImage(canvas, 0, 0);
+
+                    processedImageData = canvas.toDataURL('image/png');
+                    processedImageData = processedImageData.replace('data:image/png;base64,', `data:image/png;base64,${MAGIC_HEADER}`);
+
+                    downloadBtn.disabled = false;
+                    showStatus('图片加密成功！', 'success');
+                } catch (error) {
+                    showStatus('加密失败：' + error.message, 'error');
+                } finally {
+                    encryptBtn.innerHTML = '🔒 加密图片';
+                    encryptBtn.disabled = false;
+                }
+            }, 100);
+        });
+
+        decryptBtn.addEventListener('click', () => {
+            const password = passwordInput.value;
+            if (!password) {
+                showStatus('请输入解密密码！', 'error');
+                return;
+            }
+            if (!currentImage) {
+                showStatus('请先选择加密图片！', 'error');
+                return;
+            }
+
+            decryptBtn.innerHTML = '<span class="loading"></span> 解密中...';
+            decryptBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = currentImage.width;
+                    canvas.height = currentImage.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(currentImage, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    const key = hashPassword(password);
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        if (i < data.length - 1) {
+                            data[i] ^= (key >> 16) & 0xFF;
+                            data[i + 1] ^= (key >> 8) & 0xFF;
+                            data[i + 2] ^= key & 0xFF;
+                        }
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    processedCanvas.width = canvas.width;
+                    processedCanvas.height = canvas.height;
+                    const processedCtx = processedCanvas.getContext('2d');
+                    processedCtx.drawImage(canvas, 0, 0);
+
+                    processedImageData = canvas.toDataURL('image/png');
+                    downloadBtn.disabled = false;
+                    showStatus('图片解密成功！', 'success');
+                } catch (error) {
+                    showStatus('解密失败：密码错误或图片损坏', 'error');
+                } finally {
+                    decryptBtn.innerHTML = '🔓 解密图片';
+                    decryptBtn.disabled = false;
+                }
+            }, 100);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!processedImageData) return;
+
+            const link = document.createElement('a');
+            const timestamp = new Date().getTime();
+            link.download = isEncrypted ? `decrypted_${timestamp}.png` : `encrypted_${timestamp}.png`;
+            link.href = processedImageData;
+            link.click();
+            showStatus('图片下载成功！', 'success');
+        });
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
